@@ -37,4 +37,8 @@ export default class TransportMissionService extends MissionService<TransportTas
   get stayTasks (): TransportTask[] {
     return this.getTasksByTaskType(TransportTaskType.STAY)
   }
+
+  get rescuedInjuredsCount (): number {
+    return this.rescueTasks.reduce((count, task) => count + task.injuredsCount, 0)
+  }
 }

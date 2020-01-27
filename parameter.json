@@ -1,0 +1,73 @@
+{
+  "project": {
+      "startedAt": "2020/01/01 00:00:00",
+      "finishedAt": "2020/01/03 23:59:00"
+  },
+  "tasks": {
+      "rescue": 1800000,
+      "refuel": 1200000,
+      "unload": 300000
+  },
+  "helicopterConfig": {
+      "useRescueRate": true,
+      "schedule": {
+          "startHours": 6,
+          "startMinutes": 0,
+          "endHours": 18,
+          "endMinutes": 0
+      }
+  },
+  "bases": [
+      {
+          "displayName": "高知空港",
+          "position": {
+              "latitude": 33.5466513,
+              "longitude": 133.671616
+          },
+          "isRefuelable": true,
+          "baseType": "HELICOPTER",
+          "maxLandableCount": 2,
+          "helicopters": [
+              {
+                  "speed": 12000000,
+                  "maxInjuredsCount": 4
+              },
+              {
+                  "speed": 12000000,
+                  "maxInjuredsCount": 4
+              }
+          ]
+      },
+      {
+          "displayName": "南国病院",
+          "position": {
+              "latitude": 33.5684309,
+              "longitude": 133.6325643
+          },
+          "isRefuelable": false,
+          "maxLandableCount": 1,
+          "baseType": "FORWARD",
+          "helicopters": []
+      }
+  ],
+  "shelters": [
+      {
+          "displayName": "日章小学校",
+          "maxLandableCount": 1,
+          "requestedInjuredsCount": 1000,
+          "position": {
+              "latitude": 33.5648524,
+              "longitude": 133.6882191
+          }
+      },
+      {
+          "displayName": "北陵中学校",
+          "maxLandableCount": 1,
+          "requestedInjuredsCount": 5000,
+          "position": {
+              "latitude": 33.6050257,
+              "longitude": 133.6264054
+          }
+      }
+  ]
+}

@@ -23,7 +23,8 @@ import {
   TransportMissionService,
   TransportReturnMissionService,
   MissionService,
-  TransportService
+  TransportService,
+  TransportMissionsService
 } from '../services'
 
 export default class HelicopterAgent extends TransportAgent {
@@ -384,6 +385,10 @@ export default class HelicopterAgent extends TransportAgent {
 
   get transportService (): TransportService {
     return new TransportService(this.transport)
+  }
+
+  get rescuedInjuredsCount (): number {
+    return new TransportMissionsService(this.schedule.missions).getRescuedInjuredsCount(this.current)
   }
 
   clone (environment?: Environment): HelicopterAgent {

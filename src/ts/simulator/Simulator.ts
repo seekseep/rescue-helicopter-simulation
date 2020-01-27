@@ -115,12 +115,13 @@ export default class Simulator {
       `終了日時: ${this.project.finishedAt.toLocaleString()}`,
       '======',
       '被災地',
-      this.environment.shelterAgents.map(({ displayName, injuredsCount, requestedInjuredsCount }) => ([
+      this.environment.shelterAgents.map(({ displayName, injuredsCount, rescuedInjuredsCount, requestedInjuredsCount, rescueRate }) => ([
         displayName,
         [
-          `要救助者数:${injuredsCount}`,
-          `要請要救助者数:${requestedInjuredsCount}`,
-          `救助率:${injuredsCount / requestedInjuredsCount * 100}%`
+          `要請数: ${requestedInjuredsCount}`,
+          `救助済み: ${rescuedInjuredsCount}`,
+          `未救助: ${injuredsCount}`,
+          `救助率: ${rescueRate * 100}%`
         ]
       ])),
       '基地',
@@ -139,17 +140,18 @@ export default class Simulator {
         })
       ])),
       'ヘリコプター',
-      this.environment.helicopterAgents.map(({ displayName, missions }) => (
+      this.environment.helicopterAgents.map(({ displayName, missions, rescuedInjuredsCount }) => (
         [
           displayName,
+          `救助済み負傷者数: ${rescuedInjuredsCount}`,
           missions.map(mission => {
             const { startedAt, startedIn, finishedAt, finishedIn } = new TransportMissionService(mission)
             return [
               mission.displayName,
               `${startedAt.toLocaleString()}@${startedIn.displayName} → ${finishedAt.toLocaleString()}@${finishedIn.displayName}`,
-              mission.tasks.map(({ type, startedIn, startedAt, finishedIn, finishedAt }) =>
+              mission.tasks.map(({ type, startedIn, startedAt, finishedIn, finishedAt, injuredsCount }) =>
                 [
-                  taskTypeToLabel(type),
+                  `${taskTypeToLabel(type)} ${injuredsCount ? `(負傷者数:${injuredsCount})` : ''}`,
                   `${startedAt.toLocaleString()}@${startedIn.displayName} → ${finishedAt.toLocaleString()}@${finishedIn.displayName}`
                 ]
               )

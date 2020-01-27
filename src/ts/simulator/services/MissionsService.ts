@@ -14,6 +14,12 @@ export default class MissionsService<TT, T extends Task<TT>> {
     )
   }
 
+  getFinishedMissions (date: Date): Mission<TT, T>[] {
+    return this.missions.filter(mission =>
+      new MissionService(mission).finishedAt <= date
+    )
+  }
+
   clone (): Mission<TT, T>[] {
     return this.missions.map(mission => new MissionService(mission).clone())
   }

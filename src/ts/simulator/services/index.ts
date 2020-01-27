@@ -9,6 +9,7 @@ import TransportMissionService from './TransportMissionService'
 import TransportReturnMissionService from './TransportReturnMissionService'
 import TransportScheduleServive from './TransportScheduleServive'
 import TransportService from './TransportService'
+import TransportMissionsService from './TransportMissionsService'
 
 export {
   MissionService,
@@ -21,5 +22,6 @@ export {
   TransportMissionService,
   TransportScheduleServive,
   TransportService,
-  TransportReturnMissionService
+  TransportReturnMissionService,
+  TransportMissionsService
 }
