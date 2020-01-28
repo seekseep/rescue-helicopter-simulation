@@ -20,9 +20,9 @@ export const ceilTime = (time: number): number => {
   return Math.ceil(time / MINUTE) * MINUTE
 }
 
-export const moveTime = (fromPosition: GeolibInputCoordinates, toPosition: GeolibInputCoordinates, speed: number): number => (
-  Math.ceil(distance(fromPosition, toPosition) / speed)
-)
+export const moveTime = (fromPosition: GeolibInputCoordinates, toPosition: GeolibInputCoordinates, speed: number): number => {
+  return distance(fromPosition, toPosition) / speed * MINUTE
+}
 
 export const dateToString = (date: Date): string => (
   `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`
