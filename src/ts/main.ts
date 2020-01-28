@@ -27,10 +27,10 @@ const defaultValues = {
     baseType: 'HELICOPTER',
     maxLandableCount: 2,
     helicopters: [{
-      speed: 12000000,
+      speed: 200 / 60 * 1000,
       maxInjuredsCount: 4
     }, {
-      speed: 12000000,
+      speed: 200 / 60 * 1000,
       maxInjuredsCount: 4
     }]
   }, {
