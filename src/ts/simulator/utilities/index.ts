@@ -2,6 +2,13 @@ import { MINUTE } from '../constants'
 import { getDistance } from 'geolib'
 import { GeolibInputCoordinates } from 'geolib/es/types'
 
+const buildGetNewID = (): () => number => {
+  let _id = 1
+  return (): number => _id++
+}
+
+export const getNewID = buildGetNewID()
+
 export const distance = (fromPosition: GeolibInputCoordinates, toPosition: GeolibInputCoordinates): number => (
   getDistance(
     fromPosition,
@@ -52,10 +59,3 @@ export const messagesToString = (messages, depth: number): string => {
     }
   }).join('\n')
 }
-
-const buildGetNewID = (): () => number => {
-  let _id = 1
-  return (): number => _id++
-}
-
-export const getNewID = buildGetNewID()
