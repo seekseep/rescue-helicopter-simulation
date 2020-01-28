@@ -149,7 +149,7 @@ export default class HelicopterAgent extends TransportAgent {
     const rescueTask = transportService.buildRescueTask(
       shelterAgent.getLandableAt(moveToShelterTask.finishedAt, +config.get('TASK_DURATION_RESCUE')),
       shelterAgent.place,
-      Math.min(shelterAgent.injuredsCount, this.helicopter.maxInjuredsCount)
+      Math.min(shelterAgent.willRescuedInjuredsCount, this.helicopter.maxInjuredsCount)
     )
 
     if (!utils.equalDate(moveToShelterTask.finishedAt, rescueTask.startedAt)) {

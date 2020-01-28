@@ -8,4 +8,8 @@ export default class ShelterScheduleService extends ScheduleService<PlaceTaskTyp
       return rescuedInjuredsCount + task.injuredsCount
     }, 0)
   }
+
+  getWillRescueInjuredsCount (): number {
+    return this.tasks.reduce((count, task) => task.type === PlaceTaskType.RESCUE ? count + task.injuredsCount : count, 0)
+  }
 }
