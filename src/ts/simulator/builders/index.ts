@@ -4,6 +4,7 @@ import * as places from './places'
 import * as schedules from './schedules'
 import * as tasks from './tasks'
 import * as transports from './transports'
+import * as texts from './texts'
 
 export {
   agents,
@@ -11,5 +12,6 @@ export {
   places,
   schedules,
   tasks,
-  transports
+  transports,
+  texts
 }

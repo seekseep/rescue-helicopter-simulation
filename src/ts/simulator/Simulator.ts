@@ -1,9 +1,7 @@
 import Environment from './Environment'
-import * as utils from './utilities'
 import * as builders from './builders'
 import config from './config'
-import { PlaceID, BaseType, TransportID, Position, Project, TaskTyep, TransportTaskType, PlaceTaskType } from './entities'
-import { TransportMissionService, MissionService } from './services'
+import { PlaceID, BaseType, TransportID, Position, Project } from './entities'
 
 export default class Simulator {
   project: Project
@@ -111,72 +109,7 @@ export default class Simulator {
   }
 
   getResult (): string {
-    function taskTypeToLabel (taskType: TaskTyep): string {
-      switch (taskType) {
-        case PlaceTaskType.HOLD:
-        case TransportTaskType.STAY: return '滞在'
-        case TransportTaskType.REFUEL:
-        case PlaceTaskType.REFUEL: return '給油'
-        case TransportTaskType.RESCUE:
-        case PlaceTaskType.RESCUE: return '救助'
-        case PlaceTaskType.UNLOAD: return '受入'
-        case TransportTaskType.MOVE: return '移動'
-        case TransportTaskType.WAIT: return '待機'
-        case TransportTaskType.UNLOAD: return '降機'
-
-        default: return '不明'
-      }
-    }
-
-    return utils.messagesToString([
-      `開始日時: ${this.project.startedAt.toLocaleString()}`,
-      `終了日時: ${this.project.finishedAt.toLocaleString()}`,
-      '======',
-      '被災地',
-      this.environment.shelterAgents.map(({ displayName, injuredsCount, rescuedInjuredsCount, requestedInjuredsCount, rescueRate }) => ([
-        displayName,
-        [
-          `要請数: ${requestedInjuredsCount}`,
-          `救助済み: ${rescuedInjuredsCount}`,
-          `未救助: ${injuredsCount}`,
-          `救助率: ${rescueRate * 100}%`
-        ]
-      ])),
-      '基地',
-      this.environment.baseAgents.map(({ displayName, missions }) => ([
-        displayName,
-        missions.map(mission => {
-          const { startedAt, finishedAt } = new MissionService(mission)
-          return [
-            mission.displayName,
-              `${startedAt.toLocaleString()} → ${finishedAt.toLocaleString()}`,
-              mission.tasks.map(({ type, startedAt, finishedAt, transport }) => ([
-                taskTypeToLabel(type),
-                `${startedAt.toLocaleString()} → ${finishedAt.toLocaleString()} (${transport.displayName})`
-              ]))
-          ]
-        })
-      ])),
-      'ヘリコプター',
-      this.environment.helicopterAgents.map(({ displayName, missions, rescuedInjuredsCount }) => (
-        [
-          displayName,
-          `救助済み負傷者数: ${rescuedInjuredsCount}`,
-          missions.map(mission => {
-            const { startedAt, startedIn, finishedAt, finishedIn } = new TransportMissionService(mission)
-            return [
-              mission.displayName,
-              `${startedAt.toLocaleString()}@${startedIn.displayName} → ${finishedAt.toLocaleString()}@${finishedIn.displayName}`,
-              mission.tasks.map(({ type, startedIn, startedAt, finishedIn, finishedAt, injuredsCount }) =>
-                [
-                  `${taskTypeToLabel(type)} ${injuredsCount ? `(負傷者数:${injuredsCount})` : ''}`,
-                  `${startedAt.toLocaleString()}@${startedIn.displayName} → ${finishedAt.toLocaleString()}@${finishedIn.displayName}`
-                ]
-              )
-            ]
-          })
-        ]
-      ))
-    ], 0)
+    const { project, environment } = this
+    return builders.texts.result(project, environment)
   }
 }
