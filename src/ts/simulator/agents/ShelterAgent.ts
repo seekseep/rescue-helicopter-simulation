@@ -40,8 +40,8 @@ export default class ShelterAgent extends PlaceAgent {
     return this.getRescueRate(this.current)
   }
 
-  get willRescuedInjuredsCount (): number {
-    return this.scheduleService.getWillRescueInjuredsCount()
+  get willInjuredsCount (): number {
+    return this.requestedInjuredsCount - this.scheduleService.getWillRescueInjuredsCount()
   }
 
   get displayName (): string {
