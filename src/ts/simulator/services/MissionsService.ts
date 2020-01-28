@@ -8,10 +8,10 @@ export default class MissionsService<TT, T extends Task<TT>> {
   }
 
   get fastestMission (): Mission<TT, T> {
-    return this.missions.reduce((fastestMission, mission) =>
+    return this.missions.length > 1 ? this.missions.reduce((fastestMission, mission) =>
       new MissionService(fastestMission).finishedAt < new MissionService(mission).finishedAt
         ? fastestMission : mission
-    )
+    ) : this.missions[0]
   }
 
   getFinishedMissions (date: Date): Mission<TT, T>[] {

@@ -58,8 +58,9 @@ export default class HelicopterAgent extends TransportAgent {
 
   buildOptimalRescueMission (shelterAgents: ShelterAgent[]): (Mission<TransportTaskType, TransportTask>|null) {
     shelterAgents = shelterAgents.filter(agent => agent.injuredsCount > 0)
+    if (shelterAgents.length < 1) return null
 
-    if (this.useRescueRate) {
+    if (this.useRescueRate && shelterAgents.length > 1) {
       shelterAgents = new ShelterSnapshotsService(
         shelterAgents
           .map(shelterAgent => shelterAgent.getShelterSnapshot(this.current))
