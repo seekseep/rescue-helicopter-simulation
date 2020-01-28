@@ -4,7 +4,7 @@ import { Project, BaseType } from './simulator/entities'
 const defaultValues = {
   project: {
     startedAt: '2020/01/01 00:00:00',
-    finishedAt: '2020/01/03 23:59:00'
+    finishedAt: '2020/01/01 23:59:00'
   },
   tasks: {
     rescue: 30 * 60 * 1000,
@@ -32,6 +32,9 @@ const defaultValues = {
     }, {
       speed: 200 / 60 * 1000,
       maxInjuredsCount: 4
+    }, {
+      speed: 200 / 60 * 1000,
+      maxInjuredsCount: 4
     }]
   }, {
     displayName: '南国病院',
@@ -49,7 +52,7 @@ const defaultValues = {
   }, {
     displayName: '北陵中学校',
     maxLandableCount: 1,
-    requestedInjuredsCount: 5000,
+    requestedInjuredsCount: 12,
     position: { latitude: 33.6050257, longitude: 133.6264054 }
   }]
 }
