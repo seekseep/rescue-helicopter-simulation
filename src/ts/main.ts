@@ -70,6 +70,13 @@ function hideErrorDialog (): void {
   errorDialog.classList.add('hidden')
 }
 
+function setProgress (progress: number): void {
+  const progressBar: HTMLElement = document.querySelector('#progressBar')
+  const progressText: HTMLElement = document.querySelector('#progressText')
+  progressBar.style.width = (progress * 100) + '%'
+  progressText.innerHTML = (progress * 100).toFixed(2)
+}
+
 function parseParameterJSON (json: string): {project; bases: []; shelters: []; tasks} {
   const row = JSON.parse(json)
 
@@ -136,28 +143,28 @@ function parseParameterJSON (json: string): {project; bases: []; shelters: []; t
 async function simulate (project, bases, shelters, tasks): Promise<string> {
   const simulator = new Simulator()
   simulator.setup(project, bases, shelters, tasks)
-  simulator.simulate()
-  return simulator.getResult()
+
+  setProgress(0)
+  await simulator.start((progress) => setProgress(progress))
+  setProgress(1)
+
+  const result = simulator.getResult()
+  return result
 }
 
 async function submitHandler (event: Event): Promise<void> {
   event.preventDefault()
 
-  const progress: HTMLElement = document.querySelector('#progress')
   const result: HTMLTextAreaElement = document.querySelector('#result')
   const parameterInput: HTMLTextAreaElement = document.querySelector('#parameterInput')
 
   try {
-    progress.classList.remove('hidden')
-
     const parameterJSON = parameterInput.value
     const { project, bases, shelters, tasks } = parseParameterJSON(parameterJSON)
     result.value = await simulate(project, bases, shelters, tasks)
   } catch (e) {
     showErrorDialog(e.toString())
     throw e
-  } finally {
-    progress.classList.add('hidden')
   }
 }
 
@@ -170,25 +177,6 @@ function main (): void {
 
   const closeErrorDialog: HTMLButtonElement = document.querySelector('#closeErrorDialog')
   closeErrorDialog.addEventListener('click', hideErrorDialog)
-
-  const cancelButton: HTMLButtonElement = document.querySelector('#cancelButton')
-  cancelButton.addEventListener('click', () => window.location.reload())
 }
 
 window.addEventListener('load', main)
-
-//   const bases =
-
-//   const  =
-
-//   window.simulator = simulator
-
-//   simulator.setup(project, bases, shelters)
-
-//   simulator.simulate()
-
-//   const result = simulator.getResult()
-//   document.querySelector('#result').innerHTML = `${result}`
-// }
-
-// window.addEventListener('load', main)

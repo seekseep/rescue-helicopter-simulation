@@ -77,11 +77,29 @@ export default class Simulator {
     }
   }
 
-  simulate (): void {
+  simulate (excuteCallback: (date: Date) => void, doneCallbck: () => void): void {
     const environment: Environment = this.environment
     environment.helicopterAgents.forEach(agent => agent.action())
+    excuteCallback(this.environment.current)
     environment.increment()
-    if (!this.isDone) this.simulate()
+
+    if (!this.isDone) {
+      window.requestAnimationFrame(() => this.simulate(excuteCallback, doneCallbck))
+      return
+    }
+    doneCallbck()
+  }
+
+  start (excuteCallback: (progress: number) => void): Promise<void> {
+    return new Promise(resolve => {
+      this.simulate((date) => {
+        const progress = (
+          (date.getTime() - this.project.startedAt.getTime()) /
+          (this.project.finishedAt.getTime() - this.project.startedAt.getTime())
+        )
+        excuteCallback(progress)
+      }, resolve)
+    })
   }
 
   get isDone (): boolean {
