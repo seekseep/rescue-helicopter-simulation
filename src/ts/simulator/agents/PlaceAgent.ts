@@ -1,3 +1,5 @@
+import _ from 'lodash'
+
 import Agent from './Agent'
 import Environment from '../Environment'
 import {
@@ -8,47 +10,60 @@ import {
   PlaceTaskType,
   Position,
   PlaceSchedule,
-  GeneralTask
+  GeneralTask,
+  PlaceScheduleCache,
+  PlaceMission
 } from '../entities'
-import { TaskService, MissionService } from '../services'
 
-export default class PlaceAgent extends Agent<PlaceTaskType, PlaceTask> {
+export default class PlaceAgent extends Agent<PlaceTaskType, PlaceTask, PlaceMission, PlaceScheduleCache> {
   place: Place
 
-  constructor (id: AgentID, place: Place, schedule: PlaceSchedule, environment: Environment) {
+  constructor (
+    id: AgentID,
+    place: Place,
+    schedule: PlaceSchedule,
+    environment: Environment
+  ) {
     super(id, schedule, environment)
     this.place = place
-  }
-
-  action (): void {
-    // do nothing
   }
 
   get placeID (): PlaceID {
     return this.place.id
   }
 
-  get position (): Position {
-    return this.place.position
-  }
-
   get displayName (): string {
     return this.place.displayName
   }
 
+  get position (): Position {
+    return this.place.position
+  }
+
   getFreeTasks (fromDate: Date): GeneralTask[] {
-    return this.scheduleService.getFreeTasks(this.place.maxLandableCount, fromDate)
+    return this.scheduleService.freeTasks.reduce((tasks: GeneralTask[], task: GeneralTask) => {
+      if (task.finishedAt < fromDate) return tasks
+
+      if (task.startedAt < fromDate) {
+        return [...tasks, {
+          ...task,
+          startedAt: fromDate
+        }]
+      }
+
+      return [...tasks, task]
+    }, [])
   }
 
   getLandableAt (arrivedAt: Date, stayingTime: number): Date {
     const freeTasks = this.getFreeTasks(arrivedAt)
     if (freeTasks.length < 1) return arrivedAt
 
-    const freeTask = freeTasks.find(freeTask => new TaskService(freeTask).duration >= stayingTime)
+    const freeTask = freeTasks.find(freeTask => freeTask.duration >= stayingTime)
     if (freeTask) return freeTask.startedAt
 
     const lastMission = this.missions[this.missions.length - 1]
-    if (lastMission) return new MissionService(lastMission).finishedAt
+    if (lastMission) return lastMission.finishedAt
 
     return arrivedAt
   }
@@ -57,7 +72,7 @@ export default class PlaceAgent extends Agent<PlaceTaskType, PlaceTask> {
     return new PlaceAgent(
       this.id,
       this.place,
-      this.scheduleService.clone(),
+      _.cloneDeep(this.schedule),
       environment || this.environment
     )
   }

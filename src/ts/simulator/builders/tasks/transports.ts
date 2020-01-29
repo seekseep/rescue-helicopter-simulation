@@ -1,4 +1,5 @@
 import { TransportTask, TransportTaskType, Place } from '../../entities'
+import * as utils from '../../utilities'
 
 export const rescue = (
   startedAt: Date,
@@ -12,7 +13,8 @@ export const rescue = (
   finishedAt,
   finishedIn: recuedIn,
   injuredsCount,
-  isRefueled: false
+  isRefueled: false,
+  duration: utils.diffDates(startedAt, finishedAt)
 })
 
 export const unload = (
@@ -27,7 +29,8 @@ export const unload = (
   finishedAt,
   finishedIn: unloadedIn,
   injuredsCount,
-  isRefueled: false
+  isRefueled: false,
+  duration: utils.diffDates(startedAt, finishedAt)
 })
 
 export const move = (
@@ -42,7 +45,8 @@ export const move = (
   finishedAt,
   finishedIn,
   injuredsCount: 0,
-  isRefueled: false
+  isRefueled: false,
+  duration: utils.diffDates(startedAt, finishedAt)
 })
 
 export const wait = (
@@ -56,7 +60,8 @@ export const wait = (
   finishedAt,
   finishedIn: waitedIn,
   injuredsCount: 0,
-  isRefueled: false
+  isRefueled: false,
+  duration: utils.diffDates(startedAt, finishedAt)
 })
 
 export const refuel = (
@@ -70,7 +75,8 @@ export const refuel = (
   finishedAt,
   finishedIn: refueledIn,
   injuredsCount: 0,
-  isRefueled: true
+  isRefueled: true,
+  duration: utils.diffDates(startedAt, finishedAt)
 })
 
 export const stay = (
@@ -84,5 +90,6 @@ export const stay = (
   startedIn: stayedIn,
   finishedIn: stayedIn,
   injuredsCount: 0,
-  isRefueled: false
+  isRefueled: false,
+  duration: utils.diffDates(startedAt, finishedAt)
 })

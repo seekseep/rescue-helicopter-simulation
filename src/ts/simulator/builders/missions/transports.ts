@@ -1,3 +1,4 @@
+import * as utils from '../../utilities'
 import {
   AgentID,
   Place,
@@ -13,6 +14,11 @@ export const ready = (
 ): TransportMission => ({
   agentID,
   displayName: '準備',
+  startedAt,
+  startedIn: refueledIn,
+  finishedAt: startedAt,
+  finishedIn: refueledIn,
+  duration: 0,
   tasks: [
     tasksBuilder.refuel(startedAt, startedAt, refueledIn)
   ]
@@ -24,6 +30,11 @@ export const rescue = (
 ): TransportMission => ({
   agentID,
   displayName: '救助',
+  startedAt: tasks[0].startedAt,
+  startedIn: tasks[0].startedIn,
+  finishedAt: tasks[tasks.length - 1].finishedAt,
+  finishedIn: tasks[tasks.length - 1].finishedIn,
+  duration: utils.diffDates(tasks[0].startedAt, tasks[tasks.length - 1].finishedAt),
   tasks
 })
 
@@ -33,6 +44,11 @@ export const returnBase = (
 ): TransportMission => ({
   agentID,
   displayName: '帰還',
+  startedAt: tasks[0].startedAt,
+  startedIn: tasks[0].startedIn,
+  finishedAt: tasks[tasks.length - 1].finishedAt,
+  finishedIn: tasks[tasks.length - 1].finishedIn,
+  duration: utils.diffDates(tasks[0].startedAt, tasks[tasks.length - 1].finishedAt),
   tasks
 })
 
@@ -42,5 +58,10 @@ export const stay = (
 ): TransportMission => ({
   agentID,
   displayName: '滞在',
+  startedAt: tasks[0].startedAt,
+  startedIn: tasks[0].startedIn,
+  finishedAt: tasks[tasks.length - 1].finishedAt,
+  finishedIn: tasks[tasks.length - 1].finishedIn,
+  duration: utils.diffDates(tasks[0].startedAt, tasks[tasks.length - 1].finishedAt),
   tasks
 })

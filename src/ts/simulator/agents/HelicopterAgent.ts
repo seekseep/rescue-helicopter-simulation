@@ -1,3 +1,5 @@
+import _ from 'lodash'
+
 import config from '../config'
 import * as builders from '../builders'
 import * as utils from '../utilities'
@@ -9,33 +11,35 @@ import Environment from '../Environment'
 import {
   AgentID,
   Helicopter,
-  Mission,
   Place,
-  Schedule,
   TransportID,
   TransportMission,
   TransportTask,
-  TransportTaskType
+  TransportTaskType,
+  TransportSchedule
 } from '../entities'
 import {
   MissionsService,
-  ShelterSnapshotsService,
   TransportMissionService,
-  TransportReturnMissionService,
-  MissionService,
-  TransportService,
-  TransportMissionsService
+  TransportReturnMissionService
 } from '../services'
 
 export default class HelicopterAgent extends TransportAgent {
   helicopter: Helicopter
 
-  constructor (id: AgentID, helicopter: Helicopter, schedule: Schedule<TransportTaskType, TransportTask>, environment: Environment) {
+  constructor (
+    id: AgentID,
+    helicopter: Helicopter,
+    schedule: TransportSchedule,
+    environment: Environment
+  ) {
     super(id, helicopter, schedule, environment)
     this.helicopter = helicopter
   }
 
   action (): void {
+    super.action()
+
     if (this.isWorking) return
 
     const { shelterAgents } = this.environment
@@ -47,7 +51,7 @@ export default class HelicopterAgent extends TransportAgent {
     const returnBaseMission = this.buildLatestReturnBaseMission(rescueMission)
     const returnBaseMissionService = new TransportReturnMissionService(returnBaseMission)
     const finishDate = this.scheduleService.getFinishDate(this.current)
-    if (returnBaseMissionService.getStayTaskStartedAt <= finishDate) {
+    if (returnBaseMissionService.stayTaskStartedAt <= finishDate) {
       this.submitMission(rescueMission)
       return
     }
@@ -56,20 +60,23 @@ export default class HelicopterAgent extends TransportAgent {
     this.submitMission(optimalReturnBaseMission)
   }
 
-  buildOptimalRescueMission (shelterAgents: ShelterAgent[]): (Mission<TransportTaskType, TransportTask>|null) {
+  buildOptimalRescueMission (shelterAgents: ShelterAgent[]): (TransportMission|null) {
     shelterAgents = shelterAgents.filter(agent => agent.injuredsCount > 0)
     if (shelterAgents.length < 1) return null
 
     if (this.useRescueRate && shelterAgents.length > 1) {
-      shelterAgents = new ShelterSnapshotsService(
-        shelterAgents
-          .map(shelterAgent => shelterAgent.getShelterSnapshot(this.current))
-      ).minRescueRateShelterSnapshots.map(shelterSnapshot => (
-        this.environment.getShelterAgentByPlaceID(shelterSnapshot.id)
-      ))
+      const rescuRateToAgents = new Map<number, ShelterAgent[]>()
+      let minRescueRate = null
+      shelterAgents.forEach(agent => {
+        const rate = agent.rescueRate
+        const agents = rescuRateToAgents.get(rate) || []
+        rescuRateToAgents.set(rate, [...agents, agent])
+        minRescueRate = minRescueRate === null ? rate : Math.min(rate, minRescueRate)
+      })
+      shelterAgents = rescuRateToAgents.get(minRescueRate)
     }
 
-    const fastestMission = new MissionsService<TransportTaskType, TransportTask>(
+    const fastestMission = new MissionsService<TransportTaskType, TransportTask, TransportMission>(
       shelterAgents.map(shelterAgent =>
         this.buildRescueMission(shelterAgent)
       )
@@ -80,9 +87,7 @@ export default class HelicopterAgent extends TransportAgent {
     )
 
     const optimalMission = new MissionsService(
-      this.environment.helicopterAgents.map(helicopterAgent =>
-        helicopterAgent.buildRescueMission(rescueShelterAgent)
-      )
+      this.environment.helicopterAgents.map(agemt => agemt.buildRescueMission(rescueShelterAgent))
     ).fastestMission
 
     if (optimalMission.agentID === this.id) {
@@ -98,51 +103,31 @@ export default class HelicopterAgent extends TransportAgent {
 
   buildOptimalReturnMission (beforeMission: TransportMission): TransportMission {
     const transportService = this.transportService
-
-    const {
-      finishedAt,
-      finishedIn
-    } = new TransportMissionService(beforeMission)
-
-    const helicopterBases = this.environment.baseAgents
-      .filter(baseAgent => baseAgent.isHelicopterBase)
-      .map(helicopterBaseAgent => helicopterBaseAgent.base)
-
+    const { finishedAt, finishedIn } = beforeMission
+    const helicopterBases = this.environment.helicopterBases
     const fastestArrivableHelicopterBases = transportService.getFastestArrivablePlaces(finishedIn, helicopterBases)
     const fastestArrivableHelicopterBase = fastestArrivableHelicopterBases[0]
-
     return this.buildReturnBaseMission(finishedAt, finishedIn, fastestArrivableHelicopterBase)
   }
 
   buildLatestReturnBaseMission (beforeMission: TransportMission): TransportMission {
     const transportService = this.transportService
-
-    const {
-      finishedAt,
-      finishedIn
-    } = new TransportMissionService(beforeMission)
-
-    const helicopterBases = this.environment.baseAgents
-      .filter(baseAgent => baseAgent.isHelicopterBase)
-      .map(helicopterBaseAgent => helicopterBaseAgent.base)
-
+    const { finishedAt, finishedIn } = beforeMission
+    const helicopterBases = this.environment.helicopterBases
     const latestArrivableHelicopterBases = transportService.getLatestArrivablePlaces(finishedIn, helicopterBases)
     const latestArrivableHelicopterBase = latestArrivableHelicopterBases[0]
-
     return this.buildReturnBaseMission(finishedAt, finishedIn, latestArrivableHelicopterBase)
   }
 
-  buildRescueMission (shelterAgent: ShelterAgent): Mission<TransportTaskType, TransportTask> {
+  buildRescueMission (shelterAgent: ShelterAgent): TransportMission {
     const tasks: TransportTask[] = []
 
-    const environment = this.environment.clone()
-    const transportService = this.transportService
+    const { environment, transportService } = this
     const { lastMission } = this.scheduleService
-    const lastMissionService = new TransportMissionService(lastMission)
 
     const moveToShelterTask = transportService.buildMoveToPlaceTask(
-      lastMissionService.finishedAt,
-      lastMissionService.finishedIn,
+      lastMission.finishedAt,
+      lastMission.finishedIn,
       shelterAgent.place
     )
     tasks.push(moveToShelterTask)
@@ -163,7 +148,6 @@ export default class HelicopterAgent extends TransportAgent {
       )
     }
     tasks.push(rescueTask)
-    this.submitRescueTask(environment, rescueTask)
 
     const unloadBaseAgent = environment.baseAgents.map(baseAgent => {
       const moveToUnloadTask = transportService.buildMoveToPlaceTask(
@@ -203,9 +187,24 @@ export default class HelicopterAgent extends TransportAgent {
       )
     }
     tasks.push(unloadTask)
-    this.submitUnloadTask(environment, unloadTask)
 
-    const optimalRefuelBase = environment.baseAgents.filter(baseAgent => baseAgent.isRefuelable).map(refualbeBaseAgent => {
+    let refuelableBaseAgents = [...environment.refuelableBaseAgents]
+
+    if (unloadBaseAgent.isRefuelable) {
+      const clonedUnloadBaseAgent = unloadBaseAgent.clone()
+      clonedUnloadBaseAgent.addMission(
+        builders.missions.places.unloadByTransportTaskAndTransport(
+          clonedUnloadBaseAgent.id,
+          unloadTask,
+          this.transport
+        )
+      )
+      refuelableBaseAgents = refuelableBaseAgents.map(baseAgent =>
+        baseAgent.id === clonedUnloadBaseAgent.id ? clonedUnloadBaseAgent : baseAgent
+      )
+    }
+
+    const optimalRefuelBaseAgent = refuelableBaseAgents.map(refualbeBaseAgent => {
       const moveToUnloadTask = transportService.buildMoveToPlaceTask(
         unloadTask.finishedAt,
         unloadTask.finishedIn,
@@ -223,13 +222,13 @@ export default class HelicopterAgent extends TransportAgent {
     const moveToRefuelableBaseTask = transportService.buildMoveToPlaceTask(
       unloadTask.finishedAt,
       unloadTask.finishedIn,
-      optimalRefuelBase.place
+      optimalRefuelBaseAgent.place
     )
     tasks.push(moveToRefuelableBaseTask)
 
     const refuelTask = transportService.buildRefuelTask(
-      optimalRefuelBase.getLandableAt(moveToRefuelableBaseTask.finishedAt, +config.get('TASK_DURATION_REFUEL')),
-      optimalRefuelBase.place
+      optimalRefuelBaseAgent.getLandableAt(moveToRefuelableBaseTask.finishedAt, +config.get('TASK_DURATION_REFUEL')),
+      optimalRefuelBaseAgent.place
     )
 
     if (!utils.equalDate(moveToRefuelableBaseTask.finishedAt, refuelTask.startedAt)) {
@@ -242,15 +241,13 @@ export default class HelicopterAgent extends TransportAgent {
       )
     }
     tasks.push(refuelTask)
-    this.submitRefuelTask(environment, refuelTask)
 
     return builders.missions.transports.rescue(this.id, tasks)
   }
 
   buildReturnBaseMission (startedAt: Date, startedIn: Place, stayedIn: Place): TransportMission {
+    const { environment, transportService, scheduleService } = this
     const tasks = []
-    const environment = this.environment.clone()
-    const { transportService, scheduleService } = this
 
     const baseAgent = environment.getBaseAgentByPlaceID(stayedIn.id)
     const startDateOfNextDay = scheduleService.getStartDateOfNextDay(this.current)
@@ -279,9 +276,7 @@ export default class HelicopterAgent extends TransportAgent {
         )
       )
     }
-
     tasks.push(refuelTask)
-    this.submitRefuelTask(environment, refuelTask)
 
     const stayTask = transportService.buildStayTask(
       refuelTask.finishedAt,
@@ -289,7 +284,6 @@ export default class HelicopterAgent extends TransportAgent {
       stayedIn
     )
     tasks.push(stayTask)
-    this.submitRefuelTask(environment, stayTask)
 
     return builders.missions.transports.returnBase(this.id, tasks)
   }
@@ -303,7 +297,7 @@ export default class HelicopterAgent extends TransportAgent {
     this.submitMission(readyMission)
 
     const startDate = this.scheduleService.getStartDate(this.current)
-    const finishedAt = new MissionService(readyMission).finishedAt
+    const finishedAt = readyMission.finishedAt
     if (finishedAt < startDate) {
       const stayTask = this.transportService.buildStayTask(
         finishedAt, startDate, baseAgent.place
@@ -315,23 +309,24 @@ export default class HelicopterAgent extends TransportAgent {
 
   submitMission (mission: TransportMission): void {
     const { environment } = this
-    const missionService = new TransportMissionService(mission)
 
-    missionService.refuelTasks.forEach(refuelTask =>
-      this.submitRefuelTask(environment, refuelTask)
-    )
-
-    missionService.rescueTasks.forEach(rescueTask =>
-      this.submitRescueTask(environment, rescueTask)
-    )
-
-    missionService.unloadTasks.forEach(unloadTask =>
-      this.submitUnloadTask(environment, unloadTask)
-    )
-
-    missionService.stayTasks.forEach(stayTask =>
-      this.submitStayTask(environment, stayTask)
-    )
+    mission.tasks.forEach(task => {
+      switch (task.type) {
+        case TransportTaskType.REFUEL:
+          this.submitRefuelTask(environment, task)
+          break
+        case TransportTaskType.RESCUE:
+          this.submitRescueTask(environment, task)
+          break
+        case TransportTaskType.UNLOAD:
+          this.submitUnloadTask(environment, task)
+          break
+        case TransportTaskType.STAY:
+          this.submitStayTask(environment, task)
+          break
+        default:
+      }
+    })
 
     this.addMission(mission)
   }
@@ -359,10 +354,10 @@ export default class HelicopterAgent extends TransportAgent {
   }
 
   submitUnloadTask (environment: Environment, unloadTask: TransportTask): void {
-    const shelterAgent = environment.getBaseAgentByPlaceID(unloadTask.startedIn.id)
-    shelterAgent.addMission(
+    const baseAgent = environment.getBaseAgentByPlaceID(unloadTask.startedIn.id)
+    baseAgent.addMission(
       builders.missions.places.unloadByTransportTaskAndTransport(
-        shelterAgent.id,
+        baseAgent.id,
         unloadTask,
         this.transport
       )
@@ -384,19 +379,15 @@ export default class HelicopterAgent extends TransportAgent {
     return this.helicopter.id
   }
 
-  get transportService (): TransportService {
-    return new TransportService(this.transport)
-  }
-
   get rescuedInjuredsCount (): number {
-    return new TransportMissionsService(this.schedule.missions).getRescuedInjuredsCount(this.current)
+    return this.schedule.cache.rescuedInjuredsCount
   }
 
   clone (environment?: Environment): HelicopterAgent {
     return new HelicopterAgent(
       this.id,
       this.transport,
-      this.scheduleService.clone(),
+      _.cloneDeep(this.schedule),
       environment || this.environment
     )
   }

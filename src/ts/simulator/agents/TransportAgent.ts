@@ -1,3 +1,5 @@
+import _ from 'lodash'
+
 import Agent from './Agent'
 import Environment from '../Environment'
 import {
@@ -6,18 +8,30 @@ import {
   TransportID,
   TransportTask,
   TransportTaskType,
-  TransportSchedule
+  TransportSchedule,
+  TransportScheduleCache,
+  TransportMission
 } from '../entities'
 import {
-  TransportScheduleServive
+  TransportScheduleService, TransportService
 } from '../services'
 
-export default class TransportAgent extends Agent<TransportTaskType, TransportTask> {
+export default class TransportAgent extends Agent<TransportTaskType, TransportTask, TransportMission, TransportScheduleCache> {
   transport: Transport
+  transportService: TransportService
+  schedule: TransportSchedule
+  scheduleService: TransportScheduleService
 
-  constructor (id: AgentID, transport: Transport, schedule: TransportSchedule, environment: Environment) {
+  constructor (
+    id: AgentID,
+    transport: Transport,
+    schedule: TransportSchedule,
+    environment: Environment
+  ) {
     super(id, schedule, environment)
     this.transport = transport
+    this.transportService = new TransportService(this.transport)
+    this.scheduleService = new TransportScheduleService(this.schedule)
   }
 
   get displayName (): string {
@@ -26,10 +40,6 @@ export default class TransportAgent extends Agent<TransportTaskType, TransportTa
 
   get transportID (): TransportID {
     return this.transport.id
-  }
-
-  get scheduleService (): TransportScheduleServive {
-    return new TransportScheduleServive(this.schedule)
   }
 
   get speed (): number {
@@ -44,7 +54,7 @@ export default class TransportAgent extends Agent<TransportTaskType, TransportTa
     return new TransportAgent(
       this.id,
       this.transport,
-      this.scheduleService.clone(),
+      _.cloneDeep(this.schedule),
       environment || this.environment
     )
   }

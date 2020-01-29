@@ -1,11 +1,13 @@
 import { PlaceTask, PlaceTaskType, Transport } from '../../entities'
+import * as utils from '../../utilities'
 
 export const rescue = (startedAt: Date, finishedAt: Date, transport: Transport, injuredsCount: number): PlaceTask => ({
   type: PlaceTaskType.RESCUE,
   startedAt,
   finishedAt,
   transport,
-  injuredsCount
+  injuredsCount,
+  duration: utils.diffDates(startedAt, finishedAt)
 })
 
 export const unload = (startedAt: Date, finishedAt: Date, transport: Transport, injuredsCount: number): PlaceTask => ({
@@ -13,7 +15,8 @@ export const unload = (startedAt: Date, finishedAt: Date, transport: Transport, 
   startedAt,
   finishedAt,
   transport,
-  injuredsCount
+  injuredsCount,
+  duration: utils.diffDates(startedAt, finishedAt)
 })
 
 export const refuel = (startedAt: Date, finishedAt: Date, transport: Transport): PlaceTask => ({
@@ -21,7 +24,8 @@ export const refuel = (startedAt: Date, finishedAt: Date, transport: Transport):
   startedAt,
   finishedAt,
   transport,
-  injuredsCount: 0
+  injuredsCount: 0,
+  duration: utils.diffDates(startedAt, finishedAt)
 })
 
 export const hold = (startedAt: Date, finishedAt: Date, transport: Transport): PlaceTask => ({
@@ -29,5 +33,6 @@ export const hold = (startedAt: Date, finishedAt: Date, transport: Transport): P
   startedAt,
   finishedAt,
   transport,
-  injuredsCount: 0
+  injuredsCount: 0,
+  duration: utils.diffDates(startedAt, finishedAt)
 })

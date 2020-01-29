@@ -2,26 +2,33 @@ import { GeneralTask, Mission, Schedule, Task } from '../entities'
 import * as builders from '../builders'
 import * as utils from '../utilities'
 import { DAY } from '../constants'
-import MissionService from './MissionService'
-import MissionsService from './MissionsService'
+import { ScheduleCache } from '../entities/schedules'
 
-export default class ScheduleService<TT, T extends Task<TT>> {
-  schedule: Schedule<TT, T>
+export default class ScheduleService<TT, T extends Task<TT>, M extends Mission<TT, T>, C extends ScheduleCache<TT, T, M>> {
+  schedule: Schedule<TT, T, M, C>
 
-  constructor (schedule: Schedule<TT, T>) {
+  constructor (schedule: Schedule<TT, T, M, C>) {
     this.schedule = schedule
   }
 
-  get missions (): Mission<TT, T>[] {
+  get missions (): M[] {
     return this.schedule.missions
   }
 
-  get lastMission (): Mission<TT, T> {
-    return this.missions[this.missions.length - 1]
+  get lastMission (): M {
+    return this.schedule.cache.lastMission
   }
 
   get tasks (): T[] {
-    return this.missions.reduce((a, b) => [...a, ...b.tasks], [])
+    return this.schedule.cache.allTasks
+  }
+
+  get freeTasks (): GeneralTask[] {
+    return this.schedule.cache.freeTasks
+  }
+
+  get finishedTasks (): T[] {
+    return this.schedule.cache.finishedTasks
   }
 
   isActive (date: Date): boolean {
@@ -38,25 +45,15 @@ export default class ScheduleService<TT, T extends Task<TT>> {
     return this.getProcessingMissionsCountByDate(date) > 0
   }
 
-  getProcessingMissionsByDate (date: Date): Mission<TT, T>[] {
-    return this.schedule.missions.filter(mission => {
-      const { time, startedAt, finishedAt } = new MissionService(mission)
-      return time > 0 && startedAt <= date && date <= finishedAt
+  getProcessingMissionsByDate (date: Date): M[] {
+    return this.missions.filter(mission => {
+      const { duration, startedAt, finishedAt } = mission
+      return duration > 0 && startedAt <= date && date <= finishedAt
     })
   }
 
   getProcessingMissionsCountByDate (date: Date): number {
     return this.getProcessingMissionsByDate(date).length
-  }
-
-  getLastTaskIndex (taskType: TT): number {
-    return this.tasks.length - this.tasks.reverse().findIndex(task => task.type === taskType) - 1
-  }
-
-  getFinishedTasks (date: Date): T[] {
-    return this.tasks.filter(task => {
-      return task.finishedAt < date
-    })
   }
 
   getStartDate (current: Date): Date {
@@ -75,23 +72,68 @@ export default class ScheduleService<TT, T extends Task<TT>> {
     return utils.dateFromDateAndHoursAndMinutes(nextDate, startHours, startMinutes)
   }
 
-  getFreeTasks (maxParallelMissionsCount = 1, fromDate?: Date): GeneralTask[] {
-    const missions = fromDate ? (
-      this.missions.filter(mission => fromDate < new MissionService(mission).finishedAt)
-    ) : this.missions
+  getTasksByStartedAtTime (startedAtTime: number): T[]|null {
+    return this.schedule.cache.startedAtTimeToTasks.get(startedAtTime) || null
+  }
 
-    const points = Object.keys(missions.reduce((points, mission) => {
-      const missionService = new MissionService(mission)
-      points[missionService.startedAt.getTime()] = true
-      points[missionService.finishedAt.getTime()] = true
-      return points
-    }, {})).map(key => new Date(+key)).sort((a, b) => a.getTime() - b.getTime())
+  getTasksByFinishedAtTime (finishedAtTime: number): T[]|null {
+    return this.schedule.cache.finishedAtTimeToTasks.get(finishedAtTime) || null
+  }
+
+  addMission (mission: M, addedAt: Date): void {
+    this.missions.push(mission)
+    this.updateCacheWithNewMission(mission, addedAt)
+  }
+
+  updateCacheWithStartedTask (startedTask: T, cachedAt: Date): void {
+    const { cache } = this.schedule
+    cache.startedTasks.push(startedTask)
+    cache.cachedAt = cachedAt
+  }
+
+  updateCacheWithFinishedTask (finishedTask: T, cachedAt: Date): void {
+    const { cache } = this.schedule
+    cache.finishedTasks.push(finishedTask)
+    cache.cachedAt = cachedAt
+  }
+
+  updateCacheWithNewMission (newMission: M, cachedAt: Date): void {
+    const { cache } = this.schedule
+
+    cache.cachedAt = cachedAt
+    cache.lastMission = newMission
+    cache.allTasks = [...cache.allTasks, ...newMission.tasks]
+    newMission.tasks.forEach(task => {
+      const tasks = cache.taskTypeToTasks.get(task.type) || []
+      tasks.push(task)
+      cache.taskTypeToTasks.set(task.type, tasks)
+
+      const startedAtTime = task.startedAt.getTime()
+      cache.startedAtTimeToTasks.set(startedAtTime, [
+        ...(cache.startedAtTimeToTasks.get(startedAtTime) || []),
+        task
+      ])
+      cache.points.set(startedAtTime, task.startedAt)
+
+      const finishedAtTime = task.finishedAt.getTime()
+      cache.finishedAtTimeToTasks.set(finishedAtTime, [
+        ...(cache.finishedAtTimeToTasks.get(finishedAtTime) || []),
+        task
+      ])
+      cache.points.set(finishedAtTime, task.finishedAt)
+    })
+    cache.freeTasks = this.buildFreeTasks()
+  }
+
+  buildFreeTasks (): GeneralTask[] {
+    const { parallelMissionsCount } = this.schedule
+    const points = Array.from(this.schedule.cache.points.values()).sort((a, b) => a > b ? 1 : -1)
 
     return points.reduce((tasks: GeneralTask[], current: Date, index: number, points: Date[]): GeneralTask[] => {
       if (index === 0) return tasks
 
       const prev = points[index - 1]
-      if (this.getProcessingMissionsCountByDate(prev) >= maxParallelMissionsCount) {
+      if (this.getProcessingMissionsCountByDate(prev) >= parallelMissionsCount) {
         return tasks
       }
 
@@ -106,20 +148,5 @@ export default class ScheduleService<TT, T extends Task<TT>> {
 
       return [...otherTasks, newTask]
     }, [])
-  }
-
-  addMission (mission: Mission<TT, T>): void {
-    this.missions.push(mission)
-  }
-
-  clone (): Schedule<TT, T> {
-    const { startHours, startMinutes, endHours, endMinutes, missions } = this.schedule
-    return {
-      startHours,
-      startMinutes,
-      endHours,
-      endMinutes,
-      missions: new MissionsService(missions).clone()
-    }
   }
 }

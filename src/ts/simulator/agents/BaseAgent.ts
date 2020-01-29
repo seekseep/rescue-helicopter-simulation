@@ -1,16 +1,31 @@
+import _ from 'lodash'
 import PlaceAgent from './PlaceAgent'
 import Environment from '../Environment'
 
-import { AgentID, Base, PlaceTaskType, PlaceTask, Schedule, BaseType } from '../entities'
-import config from '../config'
-import * as utils from '../utilities'
+import {
+  AgentID,
+  Base,
+  BaseType,
+  BaseSchedule
+} from '../entities'
+import {
+  BaseScheduleService
+} from '../services'
 
 export default class BaseAgent extends PlaceAgent {
   base: Base
+  schedule: BaseSchedule
+  scheduleService: BaseScheduleService
 
-  constructor (id: AgentID, base: Base, schedule: Schedule<PlaceTaskType, PlaceTask>, environment: Environment) {
+  constructor (
+    id: AgentID,
+    base: Base,
+    schedule: BaseSchedule,
+    environment: Environment
+  ) {
     super(id, base, schedule, environment)
     this.base = base
+    this.scheduleService = new BaseScheduleService(this.schedule)
   }
 
   get isRefuelable (): boolean {
@@ -21,19 +36,11 @@ export default class BaseAgent extends PlaceAgent {
     return this.base.baseType === BaseType.HELICOPTER
   }
 
-  getIsRefualableAt (startedAt: Date): boolean {
-    if (!this.isRefuelable) return false
-
-    const landableAt = this.getLandableAt(startedAt, +config.get('TASK_DURATION_REFUEL'))
-
-    return utils.equalDate(startedAt, landableAt)
-  }
-
   clone (environment?: Environment): BaseAgent {
     return new BaseAgent(
       this.id,
       this.base,
-      this.scheduleService.clone(),
+      _.cloneDeep(this.schedule),
       environment || this.environment
     )
   }

@@ -1,3 +1,4 @@
+import * as utils from '../../utilities'
 import {
   AgentID,
   Transport,
@@ -14,6 +15,9 @@ export const refuel = (
 ): PlaceMission => ({
   agentID,
   displayName: '給油',
+  startedAt,
+  finishedAt,
+  duration: utils.diffDates(startedAt, finishedAt),
   tasks: [
     tasksBuilder.places.refuel(startedAt, finishedAt, transport)
   ]
@@ -41,6 +45,9 @@ export const unload = (
 ): PlaceMission => ({
   agentID,
   displayName: '負傷者の受け入れ',
+  startedAt,
+  finishedAt,
+  duration: utils.diffDates(startedAt, finishedAt),
   tasks: [
     tasksBuilder.places.unload(startedAt, finishedAt, transport, injuredsCount)
   ]
@@ -67,6 +74,9 @@ export const rescue = (
 ): PlaceMission => ({
   agentID,
   displayName: '救助',
+  startedAt,
+  finishedAt,
+  duration: utils.diffDates(startedAt, finishedAt),
   tasks: [
     tasksBuilder.places.rescue(startedAt, finishedAt, transport, injuredsCount)
   ]
@@ -92,6 +102,9 @@ export const hold = (
 ): PlaceMission => ({
   agentID,
   displayName: 'ヘリコプターの停留',
+  startedAt,
+  finishedAt,
+  duration: utils.diffDates(startedAt, finishedAt),
   tasks: [
     tasksBuilder.places.hold(
       startedAt,

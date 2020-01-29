@@ -1,15 +1,41 @@
 import ScheduleService from './ScheduleService'
-import { PlaceTaskType, PlaceTask } from '../entities'
+import { PlaceTaskType, PlaceTask, ShelterScheduleCache, PlaceMission } from '../entities'
 
-export default class ShelterScheduleService extends ScheduleService<PlaceTaskType, PlaceTask> {
-  getRescuedInjuredsCount (date: Date): number {
-    return this.getFinishedTasks(date).reduce((rescuedInjuredsCount, task) => {
-      if (task.type !== PlaceTaskType.RESCUE) return rescuedInjuredsCount
-      return rescuedInjuredsCount + task.injuredsCount
-    }, 0)
+export default class ShelterScheduleService extends ScheduleService<
+  PlaceTaskType,
+  PlaceTask,
+  PlaceMission,
+  ShelterScheduleCache
+> {
+  updateCacheWithFinishedTask (finisedTask: PlaceTask, cachedAt: Date): void {
+    super.updateCacheWithFinishedTask(finisedTask, cachedAt)
+
+    switch (finisedTask.type) {
+      case PlaceTaskType.RESCUE:
+        this.schedule.cache.rescuedInjuredsCount += finisedTask.injuredsCount
+        break
+      default:
+    }
   }
 
-  getWillRescueInjuredsCount (): number {
-    return this.tasks.reduce((count, task) => task.type === PlaceTaskType.RESCUE ? count + task.injuredsCount : count, 0)
+  updateCacheWithNewMission (newMission: PlaceMission, cachedAt): void {
+    super.updateCacheWithNewMission(newMission, cachedAt)
+
+    newMission.tasks.forEach(task => {
+      switch (task.type) {
+        case PlaceTaskType.RESCUE:
+          this.schedule.cache.willRescuedInjuredsCount += task.injuredsCount
+          break
+        default:
+      }
+    })
+  }
+
+  get rescuedInjuredsCount (): number {
+    return this.schedule.cache.rescuedInjuredsCount
+  }
+
+  get willRescuedInjuredsCount (): number {
+    return this.schedule.cache.willRescuedInjuredsCount
   }
 }

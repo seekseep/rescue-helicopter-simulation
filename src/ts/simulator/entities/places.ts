@@ -22,9 +22,3 @@ export type Base = {
 export type Shelter = {
   requestedInjuredsCount: number;
 } & Place
-
-export type ShelterSnapshot = {
-  createdAt: Date;
-  rescueRate: number;
-  rescuedInjuredsCount: number;
-} & Shelter

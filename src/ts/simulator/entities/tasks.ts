@@ -25,6 +25,7 @@ export interface Task<TT> {
   type: TT;
   startedAt: Date;
   finishedAt: Date;
+  duration: number;
 }
 
 export type GeneralTask = Task<GeneralTaskType>

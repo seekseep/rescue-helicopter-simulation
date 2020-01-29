@@ -2,14 +2,6 @@ import MissionService from './MissionService'
 import { TransportTask, TransportTaskType, Place } from '../entities'
 
 export default class TransportMissionService extends MissionService<TransportTaskType, TransportTask> {
-  get startedIn (): Place {
-    return this.firstTask.startedIn
-  }
-
-  get finishedIn (): Place {
-    return this.lastTask.finishedIn
-  }
-
   get rescuePlace (): Place {
     return this.rescueTasks[0].finishedIn
   }

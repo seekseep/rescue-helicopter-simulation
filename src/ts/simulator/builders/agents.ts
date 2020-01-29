@@ -29,7 +29,7 @@ export const base = (
       base.id,
       base.displayName
     ),
-    schedulesBuilder.place(),
+    schedulesBuilder.base(base.maxLandableCount),
     environment
   )
 )
@@ -54,7 +54,7 @@ export const shelter = (
       shelter.id,
       shelter.displayName
     ),
-    schedulesBuilder.place(),
+    schedulesBuilder.shelter(shelter.maxLandableCount),
     environment
   )
 )

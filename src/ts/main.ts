@@ -1,10 +1,11 @@
+
 import Simulator from './simulator/Simulator'
 import { Project, BaseType } from './simulator/entities'
 
 const defaultValues = {
   project: {
     startedAt: '2020/01/01 00:00:00',
-    finishedAt: '2020/01/01 23:59:00'
+    finishedAt: '2020/01/03 23:59:00'
   },
   tasks: {
     rescue: 30 * 60 * 1000,
@@ -47,12 +48,12 @@ const defaultValues = {
   shelters: [{
     displayName: '日章小学校',
     maxLandableCount: 1,
-    requestedInjuredsCount: 1000,
+    requestedInjuredsCount: 10000,
     position: { latitude: 33.5648524, longitude: 133.6882191 }
   }, {
     displayName: '北陵中学校',
     maxLandableCount: 1,
-    requestedInjuredsCount: 12,
+    requestedInjuredsCount: 20000,
     position: { latitude: 33.6050257, longitude: 133.6264054 }
   }]
 }
@@ -73,11 +74,13 @@ function hideErrorDialog (): void {
   errorDialog.classList.add('hidden')
 }
 
-function setProgress (progress: number): void {
+function setProgress (progress: number, step: number, duration: number): void {
   const progressBar: HTMLElement = document.querySelector('#progressBar')
   const progressText: HTMLElement = document.querySelector('#progressText')
+  const speedText: HTMLElement = document.querySelector('#speedText')
   progressBar.style.width = (progress * 100) + '%'
   progressText.innerHTML = (progress * 100).toFixed(2)
+  speedText.innerHTML = (step / (duration / 1000)).toFixed(2)
 }
 
 function parseParameterJSON (json: string): {project; bases: []; shelters: []; tasks} {
@@ -147,9 +150,20 @@ async function simulate (project, bases, shelters, tasks): Promise<string> {
   const simulator = new Simulator()
   simulator.setup(project, bases, shelters, tasks)
 
-  setProgress(0)
-  await simulator.start((progress) => setProgress(progress))
-  setProgress(1)
+  const startedAt = new Date()
+
+  function getDuration () {
+    return new Date().getTime() - startedAt.getTime()
+  }
+
+  let step = 0
+
+  setProgress(0, step, getDuration())
+  await simulator.start((progress) => {
+    step += 1
+    setProgress(progress, step, getDuration())
+  })
+  setProgress(1, step, getDuration())
 
   const result = simulator.getResult()
   return result

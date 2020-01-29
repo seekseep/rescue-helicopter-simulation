@@ -1,10 +1,11 @@
+import _ from 'lodash'
+
 import PlaceAgent from './PlaceAgent'
 import Environment from '../Environment'
 import {
   AgentID,
   Shelter,
-  ShelterSnapshot,
-  PlaceSchedule
+  ShelterSchedule
 } from '../entities'
 import {
   ShelterScheduleService
@@ -12,22 +13,26 @@ import {
 
 export default class ShelterAgent extends PlaceAgent {
   shelter: Shelter
+  schedule: ShelterSchedule
+  scheduleService: ShelterScheduleService
 
-  constructor (id: AgentID, shelter: Shelter, schedule: PlaceSchedule, environment: Environment) {
+  constructor (
+    id: AgentID,
+    shelter: Shelter,
+    schedule: ShelterSchedule,
+    environment: Environment
+  ) {
     super(id, shelter, schedule, environment)
     this.shelter = shelter
+    this.scheduleService = new ShelterScheduleService(this.schedule)
   }
 
-  get scheduleService (): ShelterScheduleService {
-    return new ShelterScheduleService(this.schedule)
+  get displayName (): string {
+    return this.shelter.displayName
   }
 
   get requestedInjuredsCount (): number {
     return this.shelter.requestedInjuredsCount
-  }
-
-  get rescuedInjuredsCount (): number {
-    return this.getRescuedInjuredsCount(this.current)
   }
 
   get injuredsCount (): number {
@@ -36,16 +41,20 @@ export default class ShelterAgent extends PlaceAgent {
     return requested - rescued
   }
 
-  get rescueRate (): number {
-    return this.getRescueRate(this.current)
+  get willRescuedInjuredsCount (): number {
+    return this.scheduleService.willRescuedInjuredsCount
   }
 
   get willInjuredsCount (): number {
-    return this.requestedInjuredsCount - this.scheduleService.getWillRescueInjuredsCount()
+    return this.requestedInjuredsCount - this.willRescuedInjuredsCount
   }
 
-  get displayName (): string {
-    return this.shelter.displayName
+  get rescuedInjuredsCount (): number {
+    return this.scheduleService.rescuedInjuredsCount
+  }
+
+  get rescueRate (): number {
+    return this.rescuedInjuredsCount / this.requestedInjuredsCount
   }
 
   getRescueRate (date: Date): number {
@@ -56,20 +65,11 @@ export default class ShelterAgent extends PlaceAgent {
     return this.scheduleService.getRescuedInjuredsCount(date)
   }
 
-  getShelterSnapshot (createdAt: Date): ShelterSnapshot {
-    return {
-      ...this.shelter,
-      createdAt,
-      rescueRate: this.getRescueRate(createdAt),
-      rescuedInjuredsCount: this.getRescuedInjuredsCount(createdAt)
-    }
-  }
-
   clone (environment?: Environment): ShelterAgent {
     return new ShelterAgent(
       this.id,
       this.shelter,
-      this.scheduleService.clone(),
+      _.cloneDeep(this.schedule),
       environment || this.environment
     )
   }

@@ -55,7 +55,7 @@ export default class Simulator {
     bases.forEach(({ helicopters, ...base }) => {
       const baseAgent = builders.agents.base(base, environment)
       environment.addBaseAgent(baseAgent)
-      helicopters.forEach((helicopter) => {
+      helicopters.forEach(helicopter => {
         const helicopterAgent = builders.agents.helicopter(helicopter, environment)
         helicopterAgent.setInitialPlace(baseAgent)
         environment.addHelicopterAgent(helicopterAgent)
@@ -77,7 +77,11 @@ export default class Simulator {
 
   simulate (excuteCallback: (date: Date) => void, doneCallbck: () => void): void {
     const environment: Environment = this.environment
+
+    environment.shelterAgents.forEach(agent => agent.action())
+    environment.baseAgents.forEach(agent => agent.action())
     environment.helicopterAgents.forEach(agent => agent.action())
+
     excuteCallback(this.environment.current)
     environment.increment()
 

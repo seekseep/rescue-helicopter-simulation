@@ -1,7 +1,7 @@
 import { TaskTyep, TransportTaskType, PlaceTaskType, Project } from '../entities'
 import * as utils from '../utilities'
-import { MissionService, TransportMissionService } from '../services'
 import Environment from '../Environment'
+import { MINUTE } from '../constants'
 
 export const taskTypeToLabel = (taskType: TaskTyep): string => {
   switch (taskType) {
@@ -41,7 +41,7 @@ export const result = (project: Project, environment: Environment): string => {
     baseAgents.map(({ displayName, missions }) => ([
       displayName,
       missions.map(mission => {
-        const { startedAt, finishedAt } = new MissionService(mission)
+        const { startedAt, finishedAt } = mission
         return [
           mission.displayName,
             `${startedAt.toLocaleString()} → ${finishedAt.toLocaleString()}`,
@@ -65,9 +65,9 @@ export const result = (project: Project, environment: Environment): string => {
         displayName,
         `救助済み負傷者数: ${rescuedInjuredsCount}`,
         missions.map(mission => {
-          const { startedAt, startedIn, finishedAt, finishedIn } = new TransportMissionService(mission)
+          const { startedAt, startedIn, finishedAt, finishedIn } = mission
           return [
-            mission.displayName,
+            `${mission.displayName} (${utils.ceilTime(utils.diffDates(startedAt, finishedAt)) / MINUTE}分)`,
             `${startedAt.toLocaleString()}@${startedIn.displayName} → ${finishedAt.toLocaleString()}@${finishedIn.displayName}`,
             mission.tasks.map(({ type, startedIn, startedAt, finishedIn, finishedAt, injuredsCount }) => {
               const messages = []
@@ -83,7 +83,7 @@ export const result = (project: Project, environment: Environment): string => {
               messages.push(`${startedAt.toLocaleString()}@${startedIn.displayName} → ${finishedAt.toLocaleString()}@${finishedIn.displayName}`)
 
               return [
-                taskTypeToLabel(type),
+                `${taskTypeToLabel(type)} (${utils.ceilTime(utils.diffDates(startedAt, finishedAt)) / MINUTE}分)`,
                 messages
               ]
             })

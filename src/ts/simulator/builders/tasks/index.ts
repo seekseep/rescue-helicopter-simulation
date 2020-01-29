@@ -1,13 +1,14 @@
-import { Task } from '../../entities'
+import { GeneralTaskType, GeneralTask } from '../../entities'
+import * as utils from '../../utilities'
 
 import * as places from './places'
 import * as transports from './transports'
-import { GeneralTaskType } from '../../entities/tasks'
 
-const free = (startedAt: Date, finishedAt: Date): Task => ({
+const free = (startedAt: Date, finishedAt: Date): GeneralTask => ({
   type: GeneralTaskType.FREE,
   startedAt,
-  finishedAt
+  finishedAt,
+  duration: utils.diffDates(startedAt, finishedAt)
 })
 
 export {

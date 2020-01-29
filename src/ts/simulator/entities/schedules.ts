@@ -1,22 +1,61 @@
 import {
-  Mission
+  Mission,
+  PlaceMission,
+  TransportMission
 } from './missions'
 import {
   Task,
   PlaceTaskType,
   PlaceTask,
   TransportTask,
-  TransportTaskType
+  TransportTaskType,
+  GeneralTask
 } from './tasks'
 
-export interface Schedule<TT, T extends Task<TT>> {
+export interface ScheduleCache <TT, T extends Task<TT>, M extends Mission<TT, T>> {
+  cachedAt: Date;
+  lastMission: M;
+  allTasks: T[];
+  freeTasks: GeneralTask[];
+  taskTypeToTasks: Map<TT, T[]>;
+  points: Map<number, Date>;
+  startedAtTimeToTasks: Map<number, T[]>;
+  finishedAtTimeToTasks: Map<number, T[]>;
+  startedTasks: T[];
+  finishedTasks: T[];
+}
+
+export type PlaceScheduleCache = {
+  injuredsCount: number;
+} & ScheduleCache<PlaceTaskType, PlaceTask, PlaceMission>
+
+export type ShelterScheduleCache = {
+  rescuedInjuredsCount: number;
+  willRescuedInjuredsCount: number;
+} & PlaceScheduleCache
+
+export type BaseScheduleCache = {
+
+} & PlaceScheduleCache
+
+export type TransportScheduleCache = {
+  rescuedInjuredsCount: number;
+} & ScheduleCache<TransportTaskType, TransportTask, TransportMission>
+
+export interface Schedule<TT, T extends Task<TT>, M extends Mission<TT, T>, C extends ScheduleCache<TT, T, M>> {
   startHours: number;
   startMinutes: number;
   endHours: number;
   endMinutes: number;
-  missions: Mission<TT, T>[];
+  parallelMissionsCount: number;
+  missions: M[];
+  cache: C;
 }
 
-export type PlaceSchedule = Schedule<PlaceTaskType, PlaceTask>
+export type PlaceSchedule = Schedule<PlaceTaskType, PlaceTask, PlaceMission, PlaceScheduleCache>
 
-export type TransportSchedule = Schedule<TransportTaskType, TransportTask>
+export type ShelterSchedule = Schedule<PlaceTaskType, PlaceTask, PlaceMission, ShelterScheduleCache>
+
+export type BaseSchedule = Schedule<PlaceTaskType, PlaceTask, PlaceMission, BaseScheduleCache>
+
+export type TransportSchedule = Schedule<TransportTaskType, TransportTask, TransportMission, TransportScheduleCache>

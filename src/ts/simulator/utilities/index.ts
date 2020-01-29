@@ -59,3 +59,7 @@ export const messagesToString = (messages, depth: number): string => {
     }
   }).join('\n')
 }
+
+export const placesPairID = (a: number, b: number): string => (
+  a < b ? `${a}_${b}` : `${b}_${a}`
+)
