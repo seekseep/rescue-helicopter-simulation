@@ -1,0 +1,415 @@
+{
+  "project": {
+      "startedAt": "2020/01/01 00:00:00",
+      "finishedAt": "2020/01/03 23:59:00"
+  },
+  "tasks": {
+      "rescue": 1800000,
+      "refuel": 1200000,
+      "unload": 300000
+  },
+  "helicopterConfig": {
+      "useRescueRate": true,
+      "schedule": {
+          "startHours": 6,
+          "startMinutes": 0,
+          "endHours": 18,
+          "endMinutes": 0
+      }
+  },
+  "bases": [
+      {
+          "displayName": "Place - 1",
+          "position": {
+              "latitude": 33.5466513,
+              "longitude": 133.671616
+          },
+          "isRefuelable": true,
+          "baseType": "HELICOPTER",
+          "maxLandableCount": 35,
+          "helicopters": [
+              {
+                  "speed": 333.333,
+                  "maxInjuredsCount": 4
+              },
+              {
+                  "speed": 333.333,
+                  "maxInjuredsCount": 4
+              },
+              {
+                  "speed": 333.333,
+                  "maxInjuredsCount": 4
+              },
+              {
+                  "speed": 333.333,
+                  "maxInjuredsCount": 4
+              },
+              {
+                  "speed": 333.333,
+                  "maxInjuredsCount": 4
+              },
+              {
+                  "speed": 333.333,
+                  "maxInjuredsCount": 4
+              },
+              {
+                  "speed": 333.333,
+                  "maxInjuredsCount": 4
+              },
+              {
+                  "speed": 333.333,
+                  "maxInjuredsCount": 4
+              },
+              {
+                  "speed": 333.333,
+                  "maxInjuredsCount": 4
+              },
+              {
+                  "speed": 333.333,
+                  "maxInjuredsCount": 4
+              },
+              {
+                  "speed": 333.333,
+                  "maxInjuredsCount": 4
+              },
+              {
+                  "speed": 333.333,
+                  "maxInjuredsCount": 4
+              },
+              {
+                  "speed": 333.333,
+                  "maxInjuredsCount": 4
+              },
+              {
+                  "speed": 333.333,
+                  "maxInjuredsCount": 4
+              },
+              {
+                  "speed": 333.333,
+                  "maxInjuredsCount": 4
+              },
+              {
+                  "speed": 333.333,
+                  "maxInjuredsCount": 4
+              },
+              {
+                  "speed": 333.333,
+                  "maxInjuredsCount": 4
+              },
+              {
+                  "speed": 333.333,
+                  "maxInjuredsCount": 4
+              },
+              {
+                  "speed": 333.333,
+                  "maxInjuredsCount": 4
+              },
+              {
+                  "speed": 333.333,
+                  "maxInjuredsCount": 4
+              },
+              {
+                  "speed": 333.333,
+                  "maxInjuredsCount": 4
+              },
+              {
+                  "speed": 333.333,
+                  "maxInjuredsCount": 4
+              },
+              {
+                  "speed": 333.333,
+                  "maxInjuredsCount": 4
+              },
+              {
+                  "speed": 333.333,
+                  "maxInjuredsCount": 4
+              },
+              {
+                  "speed": 333.333,
+                  "maxInjuredsCount": 4
+              },
+              {
+                  "speed": 333.333,
+                  "maxInjuredsCount": 4
+              },
+              {
+                  "speed": 333.333,
+                  "maxInjuredsCount": 4
+              },
+              {
+                  "speed": 333.333,
+                  "maxInjuredsCount": 4
+              },
+              {
+                  "speed": 333.333,
+                  "maxInjuredsCount": 4
+              },
+              {
+                  "speed": 333.333,
+                  "maxInjuredsCount": 4
+              }
+          ]
+      },
+      {
+          "displayName": "Place - 2",
+          "position": {
+              "latitude": 33.2893564,
+              "longitude": 134.1721243
+          },
+          "isRefuelable": true,
+          "maxLandableCount": 3,
+          "baseType": "FORWARD",
+          "helicopters": []
+      },
+      {
+          "displayName": "Place - 3",
+          "position": {
+              "latitude": 33.5058142,
+              "longitude": 133.8912534
+          },
+          "isRefuelable": true,
+          "maxLandableCount": 4,
+          "baseType": "FORWARD",
+          "helicopters": []
+      },
+      {
+          "displayName": "Place - 4",
+          "position": {
+              "latitude": 33.5945779,
+              "longitude": 133.6144597
+          },
+          "isRefuelable": true,
+          "maxLandableCount": 3,
+          "baseType": "FORWARD",
+          "helicopters": []
+      },
+      {
+          "displayName": "Place - 5",
+          "position": {
+              "latitude": 33.5769143,
+              "longitude": 133.6975064
+          },
+          "isRefuelable": true,
+          "maxLandableCount": 4,
+          "baseType": "FORWARD",
+          "helicopters": []
+      },
+      {
+          "displayName": "Place - 6",
+          "position": {
+              "latitude": 33.5083166,
+              "longitude": 133.5033632
+          },
+          "isRefuelable": true,
+          "maxLandableCount": 9,
+          "baseType": "FORWARD",
+          "helicopters": []
+      },
+      {
+          "displayName": "Place - 7",
+          "position": {
+              "latitude": 33.2153829,
+              "longitude": 133.1324709
+          },
+          "isRefuelable": true,
+          "maxLandableCount": 4,
+          "baseType": "FORWARD",
+          "helicopters": []
+      },
+      {
+          "displayName": "Place - 8",
+          "position": {
+              "latitude": 32.7910816,
+              "longitude": 132.9567304
+          },
+          "isRefuelable": true,
+          "maxLandableCount": 4,
+          "baseType": "FORWARD",
+          "helicopters": []
+      },
+      {
+          "displayName": "Place - 9",
+          "position": {
+              "latitude": 32.9690179,
+              "longitude": 132.7810609
+          },
+          "isRefuelable": true,
+          "maxLandableCount": 8,
+          "baseType": "FORWARD",
+          "helicopters": []
+      }
+  ],
+  "shelters": [
+      {
+          "displayName": "Place - 10",
+          "maxLandableCount": 3,
+          "requestedInjuredsCount": 60,
+          "position": {
+              "latitude": 33.5444834,
+              "longitude": 134.2949934
+          }
+      },
+      {
+          "displayName": "Place - 11",
+          "maxLandableCount": 3,
+          "requestedInjuredsCount": 320,
+          "position": {
+              "latitude": 33.2917692,
+              "longitude": 134.1519663
+          }
+      },
+      {
+          "displayName": "Place - 12",
+          "maxLandableCount": 3,
+          "requestedInjuredsCount": 50,
+          "position": {
+              "latitude": 33.4266392,
+              "longitude": 134.0170063
+          }
+      },
+      {
+          "displayName": "Place - 13",
+          "maxLandableCount": 3,
+          "requestedInjuredsCount": 70,
+          "position": {
+              "latitude": 33.4285702,
+              "longitude": 134.0106266
+          }
+      },
+      {
+          "displayName": "Place - 14",
+          "maxLandableCount": 3,
+          "requestedInjuredsCount": 70,
+          "position": {
+              "latitude": 33.4419577,
+              "longitude": 133.9845019
+          }
+      },
+      {
+          "displayName": "Place - 15",
+          "maxLandableCount": 3,
+          "requestedInjuredsCount": 250,
+          "position": {
+              "latitude": 33.5059531,
+              "longitude": 133.9028166
+          }
+      },
+      {
+          "displayName": "Place - 16",
+          "maxLandableCount": 3,
+          "requestedInjuredsCount": 10,
+          "position": {
+              "latitude": 33.5282742,
+              "longitude": 133.8186418
+          }
+      },
+      {
+          "displayName": "Place - 17",
+          "maxLandableCount": 3,
+          "requestedInjuredsCount": 330,
+          "position": {
+              "latitude": 33.5643044,
+              "longitude": 133.6974486
+          }
+      },
+      {
+          "displayName": "Place - 18",
+          "maxLandableCount": 3,
+          "requestedInjuredsCount": 540,
+          "position": {
+              "latitude": 33.6107331,
+              "longitude": 133.6351750
+          }
+      },
+      {
+          "displayName": "Place - 19",
+          "maxLandableCount": 3,
+          "requestedInjuredsCount": 3000,
+          "position": {
+              "latitude": 33.5616087,
+              "longitude": 133.5279095
+          }
+      },
+      {
+          "displayName": "Place - 20",
+          "maxLandableCount": 3,
+          "requestedInjuredsCount": 250,
+          "position": {
+              "latitude": 33.4942185,
+              "longitude": 133.4253985
+          }
+      },
+      {
+          "displayName": "Place - 21",
+          "maxLandableCount": 3,
+          "requestedInjuredsCount": 220,
+          "position": {
+              "latitude": 33.3919034,
+              "longitude": 133.2868151
+          }
+      },
+      {
+          "displayName": "Place - 22",
+          "maxLandableCount": 3,
+          "requestedInjuredsCount": 170,
+          "position": {
+              "latitude": 33.3353724,
+              "longitude": 133.1421287
+          }
+      },
+      {
+          "displayName": "Place - 23",
+          "maxLandableCount": 3,
+          "requestedInjuredsCount": 250,
+          "position": {
+              "latitude": 33.2189216,
+              "longitude": 132.8965406
+          }
+      },
+      {
+          "displayName": "Place - 24",
+          "maxLandableCount": 3,
+          "requestedInjuredsCount": 360,
+          "position": {
+              "latitude": 33.0264509,
+              "longitude": 133.0088611
+          }
+      },
+      {
+          "displayName": "Place - 25",
+          "maxLandableCount": 3,
+          "requestedInjuredsCount": 640,
+          "position": {
+              "latitude": 32.9952633,
+              "longitude": 132.9371271
+          }
+      },
+      {
+          "displayName": "Place - 26",
+          "maxLandableCount": 3,
+          "requestedInjuredsCount": 370,
+          "position": {
+              "latitude": 32.7918409,
+              "longitude": 132.8754527
+          }
+      },
+      {
+          "displayName": "Place - 27",
+          "maxLandableCount": 3,
+          "requestedInjuredsCount": 60,
+          "position": {
+              "latitude": 32.8340570,
+              "longitude": 132.7119252
+          }
+      },
+      {
+          "displayName": "Place - 28",
+          "maxLandableCount": 3,
+          "requestedInjuredsCount": 140,
+          "position": {
+              "latitude": 32.9382178,
+              "longitude": 132.7196298
+          }
+      }
+  ]
+}
