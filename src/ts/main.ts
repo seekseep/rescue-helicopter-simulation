@@ -1,4 +1,3 @@
-
 import Simulator from './simulator/Simulator'
 import { Project, BaseType } from './simulator/entities'
 
