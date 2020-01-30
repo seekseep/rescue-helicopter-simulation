@@ -1,8 +1,9 @@
 import _ from 'lodash'
 
 import Environment from '../Environment'
-import { AgentID, Schedule, Mission, Task, ScheduleCache } from '../entities'
+import { AgentID, Schedule, Mission, Task, ScheduleCache, GeneralTaskType,GeneralTask } from '../entities'
 import { ScheduleService } from '../services'
+import * as utils from '../utilities'
 
 export default class Agent<TT, T extends Task<TT>, M extends Mission<TT, T>, C extends ScheduleCache<TT, T, M>> {
   id: number
@@ -18,20 +19,7 @@ export default class Agent<TT, T extends Task<TT>, M extends Mission<TT, T>, C e
   }
 
   action (): void{
-    const { current } = this.environment
-    const currentTime = current.getTime()
-    const startedTasks = this.scheduleService.getTasksByStartedAtTime(currentTime)
-    if (startedTasks) {
-      startedTasks.forEach(startedTask => {
-        this.scheduleService.updateCacheWithStartedTask(startedTask, current)
-      })
-    }
-    const finishedTasks = this.scheduleService.getTasksByFinishedAtTime(currentTime)
-    if (finishedTasks) {
-      finishedTasks.forEach(finishedTask => {
-        this.scheduleService.updateCacheWithFinishedTask(finishedTask, current)
-      })
-    }
+    this.scheduleService.updateCacheWithCurrent(this.current)
   }
 
   addMission (mission: M): void {
@@ -42,8 +30,8 @@ export default class Agent<TT, T extends Task<TT>, M extends Mission<TT, T>, C e
     return this.environment.current
   }
 
-  get isWorking (): boolean {
-    return this.scheduleService.isWorking(this.current)
+  get isWorking(): boolean {
+    return this.scheduleService.isWorking
   }
 
   get isActive (): boolean {
@@ -52,13 +40,5 @@ export default class Agent<TT, T extends Task<TT>, M extends Mission<TT, T>, C e
 
   get missions (): M[] {
     return this.schedule.missions
-  }
-
-  clone (environment?: Environment): Agent<TT, T, M, C> {
-    return new Agent<TT, T, M, C>(
-      this.id,
-      _.cloneDeep(this.schedule),
-      environment || this.environment
-    )
   }
 }

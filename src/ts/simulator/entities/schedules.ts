@@ -13,20 +13,19 @@ import {
 } from './tasks'
 
 export interface ScheduleCache <TT, T extends Task<TT>, M extends Mission<TT, T>> {
-  cachedAt: Date;
   lastMission: M;
-  allTasks: T[];
   freeTasks: GeneralTask[];
   taskTypeToTasks: Map<TT, T[]>;
-  points: Map<number, Date>;
-  startedAtTimeToTasks: Map<number, T[]>;
   finishedAtTimeToTasks: Map<number, T[]>;
-  startedTasks: T[];
-  finishedTasks: T[];
+  startedAtTimeToMissions: Map<number, M[]>;
+  finishedAtTimeToMissions: Map<number, M[]>;
+  activeMissions: Map<number, M>;
+  notFinishedMissions: Map<number, M>;
+  notPassedMissionPoints: Map<number, Date>;
 }
 
 export type PlaceScheduleCache = {
-  injuredsCount: number;
+
 } & ScheduleCache<PlaceTaskType, PlaceTask, PlaceMission>
 
 export type ShelterScheduleCache = {
@@ -35,7 +34,7 @@ export type ShelterScheduleCache = {
 } & PlaceScheduleCache
 
 export type BaseScheduleCache = {
-
+  injuredsCount: number;
 } & PlaceScheduleCache
 
 export type TransportScheduleCache = {

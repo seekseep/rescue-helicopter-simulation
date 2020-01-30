@@ -1,6 +1,7 @@
 import { MINUTE } from '../constants'
 import { getDistance } from 'geolib'
 import { GeolibInputCoordinates } from 'geolib/es/types'
+import { Task, Mission } from '../entities'
 
 const buildGetNewID = (): () => number => {
   let _id = 1
@@ -63,3 +64,62 @@ export const messagesToString = (messages, depth: number): string => {
 export const placesPairID = (a: number, b: number): string => (
   a < b ? `${a}_${b}` : `${b}_${a}`
 )
+
+export const copyTasksArray = <TT, T extends Task<TT>>(tasksArray: T[]): T[] => (
+  [...tasksArray]
+)
+
+export const copyMissionsArray = <TT, T extends Task<TT>, M extends Mission<TT, T>>(missionsArray: M[]):M[] => (
+  [...missionsArray]
+)
+
+export const copyTaskTypeToTasksMap = <TT, T extends Task<TT>>(taskTypeToTasksMap: Map<TT, T[]>):Map<TT, T[]> => {
+  const map = new Map()
+  taskTypeToTasksMap.forEach((tasks, taskType) => {
+    map.set(taskType, copyTasksArray(tasks))
+  })
+  return map
+}
+
+export const copyNumberToTasksMap = <
+  TT,
+  T extends Task<TT>
+>(numberToTasksMap: Map<number, T[]>) : Map<number, T[]> => {
+  const map = new Map()
+  numberToTasksMap.forEach((tasks, number) => {
+    map.set(number, copyTasksArray(tasks))
+  })
+  return map
+}
+
+export const copyNumberToMissionsMap = <
+  TT,
+  T extends Task<TT>,
+  M extends Mission<TT, T>
+>(numberToMissionsMap: Map<number, M[]>) : Map<number, M[]> => {
+  const map = new Map()
+  numberToMissionsMap.forEach((missions, number) => {
+    map.set(number, copyMissionsArray(missions))
+  })
+  return map
+}
+
+export const copyNumberToMissionMap = <
+  TT,
+  T extends Task<TT>,
+  M extends Mission<TT, T>
+>(numberToMission: Map<number, M>) : Map<number, M> => {
+  const map = new Map()
+  numberToMission.forEach((mission, number) => {
+    map.set(number, mission)
+  })
+  return map
+}
+
+export const copyNumberToDateMap = (numberToDate: Map<number, Date>) : Map<number, Date> => {
+  const map = new Map()
+  numberToDate.forEach((date, number) => {
+    map.set(number, date)
+  })
+  return map
+}

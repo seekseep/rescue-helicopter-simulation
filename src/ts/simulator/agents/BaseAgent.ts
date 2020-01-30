@@ -6,11 +6,14 @@ import {
   AgentID,
   Base,
   BaseType,
-  BaseSchedule
+  BaseSchedule,
+  GeneralTask,
+  GeneralTaskType
 } from '../entities'
 import {
   BaseScheduleService
 } from '../services'
+import * as utils from '../utilities'
 
 export default class BaseAgent extends PlaceAgent {
   base: Base
@@ -37,10 +40,26 @@ export default class BaseAgent extends PlaceAgent {
   }
 
   clone (environment?: Environment): BaseAgent {
+    const { cache } = this.schedule
     return new BaseAgent(
       this.id,
       this.base,
-      _.cloneDeep(this.schedule),
+      {
+        ...this.schedule,
+        missions: [...this.schedule.missions],
+        cache: {
+          lastMission: cache.lastMission,
+          freeTasks: utils.copyTasksArray<GeneralTaskType, GeneralTask>(cache.freeTasks),
+          taskTypeToTasks: utils.copyTaskTypeToTasksMap(cache.taskTypeToTasks),
+          finishedAtTimeToTasks: utils.copyNumberToTasksMap(cache.finishedAtTimeToTasks),
+          startedAtTimeToMissions: utils.copyNumberToMissionsMap(cache.startedAtTimeToMissions),
+          finishedAtTimeToMissions: utils.copyNumberToMissionsMap(cache.finishedAtTimeToMissions),
+          activeMissions: utils.copyNumberToMissionMap(cache.activeMissions),
+          notFinishedMissions: utils.copyNumberToMissionMap(cache.notFinishedMissions),
+          notPassedMissionPoints: utils.copyNumberToDateMap(cache.notPassedMissionPoints),
+          injuredsCount: cache.injuredsCount,
+        }
+      },
       environment || this.environment
     )
   }

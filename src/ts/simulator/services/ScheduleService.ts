@@ -1,8 +1,9 @@
 import { GeneralTask, Mission, Schedule, Task } from '../entities'
 import * as builders from '../builders'
 import * as utils from '../utilities'
-import { DAY } from '../constants'
+import { DAY, MINUTE } from '../constants'
 import { ScheduleCache } from '../entities/schedules'
+import { mission } from '../builders/missions'
 
 export default class ScheduleService<TT, T extends Task<TT>, M extends Mission<TT, T>, C extends ScheduleCache<TT, T, M>> {
   schedule: Schedule<TT, T, M, C>
@@ -19,16 +20,12 @@ export default class ScheduleService<TT, T extends Task<TT>, M extends Mission<T
     return this.schedule.cache.lastMission
   }
 
-  get tasks (): T[] {
-    return this.schedule.cache.allTasks
-  }
-
   get freeTasks (): GeneralTask[] {
     return this.schedule.cache.freeTasks
   }
 
-  get finishedTasks (): T[] {
-    return this.schedule.cache.finishedTasks
+  get isWorking (): boolean {
+    return this.schedule.cache.activeMissions.size >= this.schedule.parallelMissionsCount
   }
 
   isActive (date: Date): boolean {
@@ -41,19 +38,10 @@ export default class ScheduleService<TT, T extends Task<TT>, M extends Mission<T
     return start <= time && time <= end
   }
 
-  isWorking (date: Date): boolean {
-    return this.getProcessingMissionsCountByDate(date) > 0
-  }
-
-  getProcessingMissionsByDate (date: Date): M[] {
-    return this.missions.filter(mission => {
-      const { duration, startedAt, finishedAt } = mission
-      return duration > 0 && startedAt <= date && date <= finishedAt
-    })
-  }
-
-  getProcessingMissionsCountByDate (date: Date): number {
-    return this.getProcessingMissionsByDate(date).length
+  getActiveMissionsCount (missions:M[], date: Date): number {
+    return missions.reduce((count, {duration, startedAt, finishedAt}) => {
+      return (duration > 0 && startedAt <= date && date < finishedAt) ? count + 1 : count
+    }, 0)
   }
 
   getStartDate (current: Date): Date {
@@ -72,81 +60,124 @@ export default class ScheduleService<TT, T extends Task<TT>, M extends Mission<T
     return utils.dateFromDateAndHoursAndMinutes(nextDate, startHours, startMinutes)
   }
 
-  getTasksByStartedAtTime (startedAtTime: number): T[]|null {
-    return this.schedule.cache.startedAtTimeToTasks.get(startedAtTime) || null
-  }
-
   getTasksByFinishedAtTime (finishedAtTime: number): T[]|null {
     return this.schedule.cache.finishedAtTimeToTasks.get(finishedAtTime) || null
   }
 
-  addMission (mission: M, addedAt: Date): void {
+  getMissionsByStartedAtTime (startedAtTime: number): M[]|null {
+    return this.schedule.cache.startedAtTimeToMissions.get(startedAtTime) || null
+  }
+
+  getMissionsByFinishedAtTime (finishedAtTime: number):M[]|null {
+    return this.schedule.cache.finishedAtTimeToMissions.get(finishedAtTime) || null
+  }
+
+  addMission (mission: M, current: Date): void {
     this.missions.push(mission)
-    this.updateCacheWithNewMission(mission, addedAt)
+    this.updateCacheWithNewMission(mission, current)
+    this.updateCacheWithCurrent(current)
   }
 
-  updateCacheWithStartedTask (startedTask: T, cachedAt: Date): void {
-    const { cache } = this.schedule
-    cache.startedTasks.push(startedTask)
-    cache.cachedAt = cachedAt
+  updateCacheWithFinishedTask (finishedTask: T): void {
+    // do nothing
   }
 
-  updateCacheWithFinishedTask (finishedTask: T, cachedAt: Date): void {
-    const { cache } = this.schedule
-    cache.finishedTasks.push(finishedTask)
-    cache.cachedAt = cachedAt
+  updateCacheWithStartedMission (startedMission: M): void {
+    this.schedule.cache.activeMissions.set(startedMission.id, startedMission)
   }
 
-  updateCacheWithNewMission (newMission: M, cachedAt: Date): void {
-    const { cache } = this.schedule
+  updateCacheWithFinishedMission (finishedMission: M): void {
+    this.schedule.cache.activeMissions.delete(finishedMission.id)
+    this.schedule.cache.notFinishedMissions.delete(finishedMission.id)
+  }
 
-    cache.cachedAt = cachedAt
-    cache.lastMission = newMission
-    cache.allTasks = [...cache.allTasks, ...newMission.tasks]
-    newMission.tasks.forEach(task => {
+  updateCacheWithNewMission (mission: M, current: Date): void {
+    const { cache } = this.schedule
+    cache.lastMission = mission
+
+    {
+      const startedAtTime = mission.startedAt.getTime()
+      cache.startedAtTimeToMissions.set(startedAtTime, [
+        ...(cache.startedAtTimeToMissions.get(startedAtTime) || []),
+        mission
+      ])
+      cache.notPassedMissionPoints.set(startedAtTime, mission.startedAt)
+
+      const finishedAtTime = mission.finishedAt.getTime()
+      cache.finishedAtTimeToMissions.set(finishedAtTime, [
+        ...(cache.finishedAtTimeToMissions.get(finishedAtTime) || []),
+        mission
+      ])
+      cache.notPassedMissionPoints.set(finishedAtTime, mission.finishedAt)
+    }
+
+    mission.tasks.forEach(task => {
       const tasks = cache.taskTypeToTasks.get(task.type) || []
       tasks.push(task)
       cache.taskTypeToTasks.set(task.type, tasks)
-
-      const startedAtTime = task.startedAt.getTime()
-      cache.startedAtTimeToTasks.set(startedAtTime, [
-        ...(cache.startedAtTimeToTasks.get(startedAtTime) || []),
-        task
-      ])
-      cache.points.set(startedAtTime, task.startedAt)
 
       const finishedAtTime = task.finishedAt.getTime()
       cache.finishedAtTimeToTasks.set(finishedAtTime, [
         ...(cache.finishedAtTimeToTasks.get(finishedAtTime) || []),
         task
       ])
-      cache.points.set(finishedAtTime, task.finishedAt)
     })
-    cache.freeTasks = this.buildFreeTasks()
+
+    this.schedule.cache.notFinishedMissions.set(mission.id, mission)
+
+    cache.freeTasks = this.buildFreeTasks(current)
   }
 
-  buildFreeTasks (): GeneralTask[] {
-    const { parallelMissionsCount } = this.schedule
-    const points = Array.from(this.schedule.cache.points.values()).sort((a, b) => a > b ? 1 : -1)
+  updateCacheWithCurrent(current: Date) {
+    const prev = current.getTime() - MINUTE
+    if (this.schedule.cache.notPassedMissionPoints.has(prev)) {
+      this.schedule.cache.notPassedMissionPoints.delete(prev)
+    }
+    const currentTime = current.getTime()
+    const finishedTasks = this.getTasksByFinishedAtTime(currentTime)
+    if (finishedTasks) {
+      finishedTasks.forEach(finishedTask => {
+        this.updateCacheWithFinishedTask(finishedTask)
+      })
+    }
+    const startedMissions = this.getMissionsByStartedAtTime(currentTime)
+    if (startedMissions) {
+      startedMissions.forEach(startedMission => {
+        this.updateCacheWithStartedMission(startedMission)
+      })
+    }
+    const finishedMissions = this.getMissionsByFinishedAtTime(currentTime)
+    if (finishedMissions) {
+      finishedMissions.forEach(finishedMission => {
+        this.updateCacheWithFinishedMission(finishedMission)
+      })
+    }
+  }
 
-    return points.reduce((tasks: GeneralTask[], current: Date, index: number, points: Date[]): GeneralTask[] => {
-      if (index === 0) return tasks
+  buildFreeTasks (current: Date): GeneralTask[] {
+    const { parallelMissionsCount } = this.schedule
+
+    const notFinishedMissions = Array.from(this.schedule.cache.notFinishedMissions.values())
+    const points = [current, ...Array.from(this.schedule.cache.notPassedMissionPoints.values())].sort((a, b) => a > b ? 1 : -1)
+
+    const freeTasks = points.reduce((tasks: GeneralTask[], current: Date, index: number, points: Date[]): GeneralTask[] => {
+      if(index === 0) return tasks
 
       const prev = points[index - 1]
-      if (this.getProcessingMissionsCountByDate(prev) >= parallelMissionsCount) {
+      if (this.getActiveMissionsCount(notFinishedMissions, prev) >= parallelMissionsCount) {
         return tasks
       }
 
+      const lastTask = tasks.splice(-1, 1)[0]
       const task = builders.tasks.free(prev, current)
-      const lastTask = tasks[tasks.length - 1]
-      if (!lastTask || lastTask.finishedAt < task.startedAt) {
-        return [...tasks, task]
-      }
+      if (!lastTask) return [...tasks, task]
 
-      const otherTasks = tasks.slice(0, -1)
-      const newTask = builders.tasks.free(lastTask.startedAt, task.finishedAt)
+      if (lastTask.finishedAt < task.startedAt) return [...tasks, lastTask, task]
 
-      return [...otherTasks, newTask]
+      const unionedTask = builders.tasks.free(lastTask.startedAt, task.finishedAt)
+      return [...tasks, unionedTask]
     }, [])
+
+    return freeTasks
   }
 }

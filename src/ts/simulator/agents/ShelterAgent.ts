@@ -5,7 +5,8 @@ import Environment from '../Environment'
 import {
   AgentID,
   Shelter,
-  ShelterSchedule
+  ShelterSchedule,
+  PlaceMission
 } from '../entities'
 import {
   ShelterScheduleService
@@ -27,6 +28,10 @@ export default class ShelterAgent extends PlaceAgent {
     this.scheduleService = new ShelterScheduleService(this.schedule)
   }
 
+  addMission (mission: PlaceMission): void {
+    super.addMission(mission)
+  }
+
   get displayName (): string {
     return this.shelter.displayName
   }
@@ -35,42 +40,29 @@ export default class ShelterAgent extends PlaceAgent {
     return this.shelter.requestedInjuredsCount
   }
 
-  get injuredsCount (): number {
-    const requested = this.requestedInjuredsCount
-    const rescued = this.rescuedInjuredsCount
-    return requested - rescued
+  get rescuedInjuredsCount(): number {
+    return this.scheduleService.rescuedInjuredsCount
   }
 
   get willRescuedInjuredsCount (): number {
     return this.scheduleService.willRescuedInjuredsCount
   }
 
-  get willInjuredsCount (): number {
-    return this.requestedInjuredsCount - this.willRescuedInjuredsCount
+  get injuredsCount (): number {
+    const requested = this.requestedInjuredsCount
+    const rescued = this.rescuedInjuredsCount
+    return requested - rescued
   }
 
-  get rescuedInjuredsCount (): number {
-    return this.scheduleService.rescuedInjuredsCount
+  get willInjuredsCount (): number {
+    const requested = this.requestedInjuredsCount
+    const willRescued = this.willRescuedInjuredsCount
+    return requested - willRescued
   }
 
   get rescueRate (): number {
-    return this.rescuedInjuredsCount / this.requestedInjuredsCount
-  }
-
-  getRescueRate (date: Date): number {
-    return this.getRescuedInjuredsCount(date) / this.requestedInjuredsCount
-  }
-
-  getRescuedInjuredsCount (date: Date): number {
-    return this.scheduleService.getRescuedInjuredsCount(date)
-  }
-
-  clone (environment?: Environment): ShelterAgent {
-    return new ShelterAgent(
-      this.id,
-      this.shelter,
-      _.cloneDeep(this.schedule),
-      environment || this.environment
-    )
+    const requested = this.requestedInjuredsCount
+    const rescued = this.rescuedInjuredsCount
+    return rescued / requested
   }
 }

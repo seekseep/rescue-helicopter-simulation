@@ -15,20 +15,20 @@ import {
   TransportSchedule,
   TransportScheduleCache,
   TransportTask,
-  TransportTaskType
+  TransportTaskType,
+  GeneralTaskType
 } from '../entities'
 
 export const defultSchduleCache = <TT, T extends Task<TT>, M extends Mission<TT, T>>(): ScheduleCache<TT, T, M> => ({
-  taskTypeToTasks: new Map(),
-  startedAtTimeToTasks: new Map(),
-  finishedAtTimeToTasks: new Map(),
-  allTasks: [],
-  freeTasks: [],
-  cachedAt: null,
   lastMission: null,
-  points: new Map(),
-  startedTasks: [],
-  finishedTasks: []
+  freeTasks: [],
+  taskTypeToTasks: new Map(),
+  finishedAtTimeToTasks: new Map(),
+  notPassedMissionPoints: new Map(),
+  startedAtTimeToMissions: new Map(),
+  finishedAtTimeToMissions: new Map(),
+  activeMissions: new Map(),
+  notFinishedMissions: new Map(),
 })
 
 export const defaultTransportScheduleCache = (): TransportScheduleCache => ({

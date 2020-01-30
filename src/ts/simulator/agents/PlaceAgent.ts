@@ -14,6 +14,7 @@ import {
   PlaceScheduleCache,
   PlaceMission
 } from '../entities'
+import * as utils from '../utilities'
 
 export default class PlaceAgent extends Agent<PlaceTaskType, PlaceTask, PlaceMission, PlaceScheduleCache> {
   place: Place
@@ -56,24 +57,21 @@ export default class PlaceAgent extends Agent<PlaceTaskType, PlaceTask, PlaceMis
   }
 
   getLandableAt (arrivedAt: Date, stayingTime: number): Date {
-    const freeTasks = this.getFreeTasks(arrivedAt)
-    if (freeTasks.length < 1) return arrivedAt
+    const freeTasks = this.scheduleService.freeTasks
+    if (freeTasks.length > 0) {
+      const freeTask = freeTasks.find(freeTask =>
+        utils.diffDates(arrivedAt, freeTask.finishedAt) >= stayingTime
+      )
+      if (freeTask) {
+        return (arrivedAt < freeTask.startedAt) ? freeTask.startedAt : arrivedAt
+      }
+    }
 
-    const freeTask = freeTasks.find(freeTask => freeTask.duration >= stayingTime)
-    if (freeTask) return freeTask.startedAt
-
-    const lastMission = this.missions[this.missions.length - 1]
-    if (lastMission) return lastMission.finishedAt
+    const lastMission = this.scheduleService.lastMission
+    if (lastMission && arrivedAt < lastMission.finishedAt ) {
+      return lastMission.finishedAt
+    }
 
     return arrivedAt
-  }
-
-  clone (environment?: Environment): PlaceAgent {
-    return new PlaceAgent(
-      this.id,
-      this.place,
-      _.cloneDeep(this.schedule),
-      environment || this.environment
-    )
   }
 }

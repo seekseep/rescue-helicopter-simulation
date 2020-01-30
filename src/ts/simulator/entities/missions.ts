@@ -8,6 +8,7 @@ import {
 import { Place } from './places'
 
 export interface Mission<TT, T extends Task<TT>> {
+  id: number;
   agentID: number;
   displayName: string;
   startedAt: Date;

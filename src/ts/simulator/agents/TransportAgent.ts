@@ -49,13 +49,4 @@ export default class TransportAgent extends Agent<TransportTaskType, TransportTa
   get useRescueRate (): boolean {
     return this.transport.useRescueRate
   }
-
-  clone (environment?: Environment): TransportAgent {
-    return new TransportAgent(
-      this.id,
-      this.transport,
-      _.cloneDeep(this.schedule),
-      environment || this.environment
-    )
-  }
 }

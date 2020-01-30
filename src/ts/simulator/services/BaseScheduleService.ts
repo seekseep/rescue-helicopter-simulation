@@ -16,8 +16,8 @@ export default class BaseScheduleService extends ScheduleService<
     return this.schedule.cache.injuredsCount
   }
 
-  updateCacheWithFinishedTask (finisedTask: PlaceTask, cachedAt: Date): void {
-    super.updateCacheWithFinishedTask(finisedTask, cachedAt)
+  updateCacheWithFinishedTask (finisedTask: PlaceTask): void {
+    super.updateCacheWithFinishedTask(finisedTask)
 
     switch (finisedTask.type) {
       case PlaceTaskType.UNLOAD:

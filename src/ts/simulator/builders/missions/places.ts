@@ -13,6 +13,7 @@ export const refuel = (
   finishedAt: Date,
   transport: Transport
 ): PlaceMission => ({
+  id: utils.getNewID(),
   agentID,
   displayName: '給油',
   startedAt,
@@ -43,6 +44,7 @@ export const unload = (
   transport: Transport,
   injuredsCount: number
 ): PlaceMission => ({
+  id: utils.getNewID(),
   agentID,
   displayName: '負傷者の受け入れ',
   startedAt,
@@ -72,6 +74,7 @@ export const rescue = (
   transport: Transport,
   injuredsCount: number
 ): PlaceMission => ({
+  id: utils.getNewID(),
   agentID,
   displayName: '救助',
   startedAt,
@@ -100,6 +103,7 @@ export const hold = (
   finishedAt: Date,
   transport: Transport
 ): PlaceMission => ({
+  id: utils.getNewID(),
   agentID,
   displayName: 'ヘリコプターの停留',
   startedAt,

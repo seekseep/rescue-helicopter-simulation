@@ -12,6 +12,7 @@ export const ready = (
   startedAt: Date,
   refueledIn: Place
 ): TransportMission => ({
+  id: utils.getNewID(),
   agentID,
   displayName: '準備',
   startedAt,
@@ -28,6 +29,7 @@ export const rescue = (
   agentID: AgentID,
   tasks: TransportTask[]
 ): TransportMission => ({
+  id: utils.getNewID(),
   agentID,
   displayName: '救助',
   startedAt: tasks[0].startedAt,
@@ -42,6 +44,7 @@ export const returnBase = (
   agentID: AgentID,
   tasks: TransportTask[]
 ): TransportMission => ({
+  id: utils.getNewID(),
   agentID,
   displayName: '帰還',
   startedAt: tasks[0].startedAt,
@@ -56,6 +59,7 @@ export const stay = (
   agentID: AgentID,
   tasks: TransportTask[]
 ): TransportMission => ({
+  id: utils.getNewID(),
   agentID,
   displayName: '滞在',
   startedAt: tasks[0].startedAt,

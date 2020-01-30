@@ -1,14 +1,15 @@
 import ScheduleService from './ScheduleService'
 import { PlaceTaskType, PlaceTask, ShelterScheduleCache, PlaceMission } from '../entities'
 
+
 export default class ShelterScheduleService extends ScheduleService<
   PlaceTaskType,
   PlaceTask,
   PlaceMission,
   ShelterScheduleCache
 > {
-  updateCacheWithFinishedTask (finisedTask: PlaceTask, cachedAt: Date): void {
-    super.updateCacheWithFinishedTask(finisedTask, cachedAt)
+  updateCacheWithFinishedTask (finisedTask: PlaceTask): void {
+    super.updateCacheWithFinishedTask(finisedTask)
 
     switch (finisedTask.type) {
       case PlaceTaskType.RESCUE:
@@ -18,8 +19,8 @@ export default class ShelterScheduleService extends ScheduleService<
     }
   }
 
-  updateCacheWithNewMission (newMission: PlaceMission, cachedAt): void {
-    super.updateCacheWithNewMission(newMission, cachedAt)
+  updateCacheWithNewMission (newMission: PlaceMission, current:Date): void {
+    super.updateCacheWithNewMission(newMission, current)
 
     newMission.tasks.forEach(task => {
       switch (task.type) {

@@ -25,8 +25,23 @@ const defaultValues = {
     position: { latitude: 33.5466513, longitude: 133.671616 },
     isRefuelable: true,
     baseType: 'HELICOPTER',
-    maxLandableCount: 2,
+    maxLandableCount: 8,
     helicopters: [{
+      speed: 200 / 60 * 1000,
+      maxInjuredsCount: 4
+    }, {
+      speed: 200 / 60 * 1000,
+      maxInjuredsCount: 4
+    }, {
+      speed: 200 / 60 * 1000,
+      maxInjuredsCount: 4
+    }, {
+      speed: 200 / 60 * 1000,
+      maxInjuredsCount: 4
+    }, {
+      speed: 200 / 60 * 1000,
+      maxInjuredsCount: 4
+    }, {
       speed: 200 / 60 * 1000,
       maxInjuredsCount: 4
     }, {
@@ -47,12 +62,12 @@ const defaultValues = {
   shelters: [{
     displayName: '日章小学校',
     maxLandableCount: 1,
-    requestedInjuredsCount: 10000,
+    requestedInjuredsCount: 200,
     position: { latitude: 33.5648524, longitude: 133.6882191 }
   }, {
     displayName: '北陵中学校',
     maxLandableCount: 1,
-    requestedInjuredsCount: 20000,
+    requestedInjuredsCount: 400,
     position: { latitude: 33.6050257, longitude: 133.6264054 }
   }]
 }
@@ -145,7 +160,7 @@ function parseParameterJSON (json: string): {project; bases: []; shelters: []; t
   }
 }
 
-async function simulate (project, bases, shelters, tasks): Promise<string> {
+async function simulate (project, bases, shelters, tasks): Promise<Simulator> {
   const simulator = new Simulator()
   simulator.setup(project, bases, shelters, tasks)
 
@@ -164,8 +179,7 @@ async function simulate (project, bases, shelters, tasks): Promise<string> {
   })
   setProgress(1, step, getDuration())
 
-  const result = simulator.getResult()
-  return result
+  return simulator
 }
 
 async function submitHandler (event: Event): Promise<void> {
@@ -177,11 +191,40 @@ async function submitHandler (event: Event): Promise<void> {
   try {
     const parameterJSON = parameterInput.value
     const { project, bases, shelters, tasks } = parseParameterJSON(parameterJSON)
-    result.value = await simulate(project, bases, shelters, tasks)
+    const simulator = await simulate(project, bases, shelters, tasks)
+    result.value = simulator.getResult()
+
+    simulator.environment.baseAgents.forEach(baseAgent => {
+
+    })
+    simulator.environment.shelterAgents.forEach(shelterAgent => {
+
+    })
+    simulator.environment.helicopterAgents.forEach(helicopterAgent => {
+
+    })
+
   } catch (e) {
     showErrorDialog(e.toString())
     throw e
   }
+}
+
+function openTab (name) {
+  Array.from(window.document.querySelectorAll('.tab')).forEach(button => {
+    button.className = 'py-2 px-4 tab'
+    if (button.getAttribute('data-tab-name') === name) {
+      button.classList.add('text-blue-500', 'font-bold')
+    } else {
+      button.classList.add('text-gray-500')
+    }
+  })
+  Array.from(window.document.querySelectorAll('.tab-content')).forEach(content => {
+    content.className = 'flex-grow flex flex-col p-2 tab-content'
+    if (content.getAttribute('data-tab-name') !== name) {
+      content.classList.add('hidden')
+    }
+  })
 }
 
 function main (): void {
@@ -193,6 +236,11 @@ function main (): void {
 
   const closeErrorDialog: HTMLButtonElement = document.querySelector('#closeErrorDialog')
   closeErrorDialog.addEventListener('click', hideErrorDialog)
+
+  document.querySelector('button[data-tab-name="log"]').addEventListener('click', () => openTab('log'))
+  document.querySelector('button[data-tab-name="graph"]').addEventListener('click', () => openTab('graph'))
+
+  openTab('log')
 }
 
 window.addEventListener('load', main)

@@ -27,7 +27,7 @@ export const result = (project: Project, environment: Environment): string => {
       `開始日時: ${project.startedAt.toLocaleString()}`,
       `終了日時: ${project.finishedAt.toLocaleString()}`
     ],
-    '被災地',
+    '被災地概要',
     shelterAgents.map(({ displayName, injuredsCount, rescuedInjuredsCount, requestedInjuredsCount, rescueRate }) => ([
       displayName,
       [
@@ -36,28 +36,6 @@ export const result = (project: Project, environment: Environment): string => {
         `未救助: ${injuredsCount}`,
         `救助率: ${rescueRate * 100}%`
       ]
-    ])),
-    '基地',
-    baseAgents.map(({ displayName, missions }) => ([
-      displayName,
-      missions.map(mission => {
-        const { startedAt, finishedAt } = mission
-        return [
-          mission.displayName,
-            `${startedAt.toLocaleString()} → ${finishedAt.toLocaleString()}`,
-            mission.tasks.map(({ type, startedAt, finishedAt, transport, injuredsCount }) => {
-              const messages = [taskTypeToLabel(type)]
-
-              if (injuredsCount) {
-                messages.push(`負傷者数: ${injuredsCount}`)
-              }
-
-              messages.push(`${startedAt.toLocaleString()} → ${finishedAt.toLocaleString()} (${transport.displayName})`)
-
-              return messages
-            })
-        ]
-      })
     ])),
     'ヘリコプター',
     helicopterAgents.map(({ displayName, missions, rescuedInjuredsCount }) => (
@@ -90,6 +68,50 @@ export const result = (project: Project, environment: Environment): string => {
           ]
         })
       ]
-    ))
+    )),
+    '基地',
+    baseAgents.map(({ displayName, missions }) => ([
+      displayName,
+      missions.map(mission => {
+        const { startedAt, finishedAt } = mission
+        return [
+          mission.displayName,
+            `${startedAt.toLocaleString()} → ${finishedAt.toLocaleString()}`,
+            mission.tasks.map(({ type, startedAt, finishedAt, transport, injuredsCount }) => {
+              const messages = [taskTypeToLabel(type)]
+
+              if (injuredsCount) {
+                messages.push(`負傷者数: ${injuredsCount}`)
+              }
+
+              messages.push(`${startedAt.toLocaleString()} → ${finishedAt.toLocaleString()} (${transport.displayName})`)
+
+              return messages
+            })
+        ]
+      })
+    ])),
+    '被災地',
+    shelterAgents.map(({ displayName, missions }) => ([
+      displayName,
+      missions.map(mission => {
+        const { startedAt, finishedAt } = mission
+        return [
+          mission.displayName,
+            `${startedAt.toLocaleString()} → ${finishedAt.toLocaleString()}`,
+            mission.tasks.map(({ type, startedAt, finishedAt, transport, injuredsCount }) => {
+              const messages = [taskTypeToLabel(type)]
+
+              if (injuredsCount) {
+                messages.push(`負傷者数: ${injuredsCount}`)
+              }
+
+              messages.push(`${startedAt.toLocaleString()} → ${finishedAt.toLocaleString()} (${transport.displayName})`)
+
+              return messages
+            })
+        ]
+      })
+    ])),
   ], 0)
 }

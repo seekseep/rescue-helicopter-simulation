@@ -39,7 +39,6 @@ export default class HelicopterAgent extends TransportAgent {
 
   action (): void {
     super.action()
-
     if (this.isWorking) return
 
     const { shelterAgents } = this.environment
@@ -86,12 +85,12 @@ export default class HelicopterAgent extends TransportAgent {
       new TransportMissionService(fastestMission).rescuePlace.id
     )
 
-    const optimalMission = new MissionsService(
-      this.environment.helicopterAgents.map(agemt => agemt.buildRescueMission(rescueShelterAgent))
-    ).fastestMission
+    const missions = this.environment.helicopterAgents.map(agent => agent.buildRescueMission(rescueShelterAgent))
 
-    if (optimalMission.agentID === this.id) {
-      return optimalMission
+    const fastestMissions = new MissionsService(missions).fastestMissions
+    if (fastestMissions.has(this.id)) {
+      const mission = fastestMissions.get(this.id)
+      return mission
     } else if (shelterAgents.length > 1) {
       return this.buildOptimalRescueMission(
         shelterAgents.filter(shelterAgent => shelterAgent.id !== rescueShelterAgent.id)
@@ -224,7 +223,9 @@ export default class HelicopterAgent extends TransportAgent {
       unloadTask.finishedIn,
       optimalRefuelBaseAgent.place
     )
-    tasks.push(moveToRefuelableBaseTask)
+    if (moveToRefuelableBaseTask.duration > 0) {
+      tasks.push(moveToRefuelableBaseTask)
+    }
 
     const refuelTask = transportService.buildRefuelTask(
       optimalRefuelBaseAgent.getLandableAt(moveToRefuelableBaseTask.finishedAt, +config.get('TASK_DURATION_REFUEL')),
@@ -381,14 +382,5 @@ export default class HelicopterAgent extends TransportAgent {
 
   get rescuedInjuredsCount (): number {
     return this.schedule.cache.rescuedInjuredsCount
-  }
-
-  clone (environment?: Environment): HelicopterAgent {
-    return new HelicopterAgent(
-      this.id,
-      this.transport,
-      _.cloneDeep(this.schedule),
-      environment || this.environment
-    )
   }
 }
