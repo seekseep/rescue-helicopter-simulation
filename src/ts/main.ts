@@ -151,7 +151,7 @@ async function simulate (project, bases, shelters, tasks): Promise<string> {
 
   const startedAt = new Date()
 
-  function getDuration () {
+  function getDuration (): number {
     return new Date().getTime() - startedAt.getTime()
   }
 
