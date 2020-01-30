@@ -4,3 +4,5 @@ node_modules
 .firebase
 .firebaserc
 firebase.json
+
+yarn-error.log
