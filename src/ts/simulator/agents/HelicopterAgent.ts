@@ -23,6 +23,7 @@ import {
   TransportMissionService,
   TransportReturnMissionService
 } from '../services'
+import { MINUTE } from '../constants'
 
 export default class HelicopterAgent extends TransportAgent {
   helicopter: Helicopter
@@ -43,41 +44,49 @@ export default class HelicopterAgent extends TransportAgent {
       return
     }
 
-    const { shelterAgents } = this.environment
+    const shelterAgents = this.filterShelterAgents(this.environment.shelterAgents)
     if (shelterAgents.length < 1) {
+      this.submitMission(this.buildOptimalReturnMission(this.scheduleService.lastMission))
       return
     }
 
     const rescueMission = this.buildOptimalRescueMission(shelterAgents)
-    if (rescueMission === null) {
+    const finishDate = this.scheduleService.getFinishDate(this.current)
+    if (rescueMission === null || rescueMission.finishedAt > finishDate) {
+      this.submitMission(this.buildOptimalReturnMission(this.scheduleService.lastMission))
       return
     }
 
-    const finishDate = this.scheduleService.getFinishDate(this.current)
-    if (rescueMission.finishedAt < finishDate) {
-      const returnBaseMission = this.buildLatestReturnBaseMission(rescueMission)
-      const returnBaseMissionService = new TransportReturnMissionService(returnBaseMission)
-      if (returnBaseMissionService.stayTaskStartedAt <= finishDate) {
-        this.submitMission(rescueMission)
-        return
-      }
+    const returnBaseMission = this.buildLatestReturnBaseMission(rescueMission)
+    if (new TransportReturnMissionService(returnBaseMission).stayTaskStartedAt > finishDate) {
+      this.submitMission(this.buildOptimalReturnMission(this.scheduleService.lastMission))
+      return
     }
 
-    const optimalReturnBaseMission = this.buildOptimalReturnMission(this.scheduleService.lastMission)
-    if (optimalReturnBaseMission.duration < 1) {
-      debugger;
-    }
-    this.submitMission(optimalReturnBaseMission)
+    this.submitMission(rescueMission)
   }
 
-  buildOptimalRescueMission (shelterAgents: ShelterAgent[]): (TransportMission|null) {
-    shelterAgents = shelterAgents.filter(agent => agent.injuredsCount > 0)
-    if (shelterAgents.length < 1) return null
+  filterShelterAgents(shelterAgents: ShelterAgent[]): ShelterAgent[] {
+    return shelterAgents.filter(shelterAgent => {
+      if (shelterAgent.willInjuredsCount < 1) return false
 
-    if (this.useRescueRate && shelterAgents.length > 1) {
+      const mission = this.buildRescueMission(shelterAgent)
+      if (new TransportMissionService(mission).flightTime > this.transport.maxContinuousFlightTime) {
+        return false
+      }
+
+      return true
+    })
+  }
+
+  buildOptimalRescueMission (targetShelterAgents: ShelterAgent[]): (TransportMission|null) {
+    if (targetShelterAgents.length < 1) return null
+
+    let shelterAgents = [...targetShelterAgents]
+    if (this.useRescueRate) {
       const rescuRateToAgents = new Map<number, ShelterAgent[]>()
       let minRescueRate = null
-      shelterAgents.forEach(agent => {
+      targetShelterAgents.forEach(agent => {
         const rate = agent.rescueRate
         const agents = rescuRateToAgents.get(rate) || []
         rescuRateToAgents.set(rate, [...agents, agent])
@@ -86,11 +95,11 @@ export default class HelicopterAgent extends TransportAgent {
       shelterAgents = rescuRateToAgents.get(minRescueRate)
     }
 
-    const fastestMission = new MissionsService<TransportTaskType, TransportTask, TransportMission>(
-      shelterAgents.map(shelterAgent =>
-        this.buildRescueMission(shelterAgent)
-      )
-    ).fastestMission
+    const fastestMission = shelterAgents.reduce((fastestMission: (TransportMission|null), shelterAgent) => {
+      const mission = this.buildRescueMission(shelterAgent)
+      if (fastestMission === null) return mission
+      return fastestMission.finishedAt < mission.finishedAt ? fastestMission : mission
+    }, null)
 
     const rescueShelterAgent = this.environment.getShelterAgentByPlaceID(
       new TransportMissionService(fastestMission).rescuePlace.id
@@ -98,14 +107,13 @@ export default class HelicopterAgent extends TransportAgent {
 
     const missions = this.environment.helicopterAgents.map(agent => agent.buildRescueMission(rescueShelterAgent))
 
-    const fastestMissions = new MissionsService(missions).fastestMissions
-    if (fastestMissions.has(this.id)) {
-      const mission = fastestMissions.get(this.id)
+    const optimalMissions = new MissionsService(missions).fastestMissions
+    if (optimalMissions.has(this.id)) {
+      const mission = optimalMissions.get(this.id)
       return mission
-    } else if (shelterAgents.length > 1) {
-      return this.buildOptimalRescueMission(
-        shelterAgents.filter(shelterAgent => shelterAgent.id !== rescueShelterAgent.id)
-      )
+    } else if (targetShelterAgents.length > 1) {
+      const nextTargetShelterAgents = targetShelterAgents.filter(shelterAgent => shelterAgent.id !== rescueShelterAgent.id)
+      return this.buildOptimalRescueMission(nextTargetShelterAgents)
     } else {
       return null
     }
@@ -130,13 +138,12 @@ export default class HelicopterAgent extends TransportAgent {
     return this.buildReturnBaseMission(finishedAt, finishedIn, latestArrivableHelicopterBase)
   }
 
-  buildRescueMission (shelterAgent: ShelterAgent): TransportMission {
+  buildRescueMission (shelterAgent: ShelterAgent): TransportMission|null {
     const tasks: TransportTask[] = []
 
     const { environment, transportService } = this
     const { lastMission } = this.scheduleService
     const startedAt = lastMission.finishedAt > this.current  ? lastMission.finishedAt : this.current
-
     const moveToShelterTask = transportService.buildMoveToPlaceTask(
       startedAt,
       lastMission.finishedIn,
@@ -151,13 +158,12 @@ export default class HelicopterAgent extends TransportAgent {
     )
 
     if (!utils.equalDate(moveToShelterTask.finishedAt, rescueTask.startedAt)) {
-      tasks.push(
-        builders.tasks.transports.wait(
-          moveToShelterTask.finishedAt,
-          rescueTask.startedAt,
-          shelterAgent.place
-        )
+      const waitInShelterTask = builders.tasks.transports.wait(
+        moveToShelterTask.finishedAt,
+        rescueTask.startedAt,
+        shelterAgent.place
       )
+      tasks.push(waitInShelterTask)
     }
     tasks.push(rescueTask)
 
@@ -190,13 +196,12 @@ export default class HelicopterAgent extends TransportAgent {
     )
 
     if (!utils.equalDate(moveToUnloadBaseTask.finishedAt, unloadTask.startedAt)) {
-      tasks.push(
-        transportService.buildWaitTask(
-          moveToUnloadBaseTask.finishedAt,
-          unloadTask.startedAt,
-          unloadBaseAgent.place
-        )
+      const waitInUnloadBaseTask = transportService.buildWaitTask(
+        moveToUnloadBaseTask.finishedAt,
+        unloadTask.startedAt,
+        unloadBaseAgent.place
       )
+      tasks.push(waitInUnloadBaseTask)
     }
     tasks.push(unloadTask)
 
@@ -246,13 +251,12 @@ export default class HelicopterAgent extends TransportAgent {
     )
 
     if (!utils.equalDate(moveToRefuelableBaseTask.finishedAt, refuelTask.startedAt)) {
-      tasks.push(
-        transportService.buildWaitTask(
-          moveToRefuelableBaseTask.finishedAt,
-          refuelTask.startedAt,
-          refuelTask.startedIn
-        )
+      const waitInRefuelBaseTask = transportService.buildWaitTask(
+        moveToRefuelableBaseTask.finishedAt,
+        refuelTask.startedAt,
+        refuelTask.startedIn
       )
+      tasks.push(waitInRefuelBaseTask)
     }
     tasks.push(refuelTask)
 

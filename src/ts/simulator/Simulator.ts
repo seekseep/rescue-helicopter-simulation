@@ -25,6 +25,7 @@ export default class Simulator {
         speed: number;
         displayName?: string;
         maxInjuredsCount: number;
+        maxContinuousFlightTime: number;
         useRescueRate: boolean;
         schedule: {
           startHours: number;

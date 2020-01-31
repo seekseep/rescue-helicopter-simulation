@@ -5,6 +5,7 @@ export interface Transport {
   speed: number;
   displayName: string;
   maxInjuredsCount: number;
+  maxContinuousFlightTime: number;
   useRescueRate: boolean;
 }
 

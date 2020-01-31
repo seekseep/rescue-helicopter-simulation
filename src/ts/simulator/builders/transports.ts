@@ -4,6 +4,7 @@ import { getNewID } from '../utilities'
 export const helicopter = (
   speed: number,
   maxInjuredsCount: number,
+  maxContinuousFlightTime: number,
   useRescueRate = false,
   id?: TransportID,
   displayName?: string
@@ -14,6 +15,7 @@ export const helicopter = (
     displayName: displayName || `Helicopter#${id}`,
     speed,
     maxInjuredsCount,
-    useRescueRate
+    useRescueRate,
+    maxContinuousFlightTime
   }
 }

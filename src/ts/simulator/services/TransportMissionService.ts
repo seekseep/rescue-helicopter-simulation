@@ -2,6 +2,14 @@ import MissionService from './MissionService'
 import { TransportTask, TransportTaskType, Place } from '../entities'
 
 export default class TransportMissionService extends MissionService<TransportTaskType, TransportTask> {
+
+  get flightTime() : number {
+    let time = 0
+    this.moveTasks.forEach(task => time += task.duration)
+    this.waitTasks.forEach(task => time += task.duration)
+    return time
+  }
+
   get rescuePlace (): Place {
     return this.rescueTasks[0].finishedIn
   }

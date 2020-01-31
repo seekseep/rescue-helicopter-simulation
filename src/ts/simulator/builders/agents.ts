@@ -63,6 +63,7 @@ export const helicopter = (
   helicopter: {
     speed: number;
     maxInjuredsCount: number;
+    maxContinuousFlightTime: number;
     useRescueRate: boolean;
     id?: AgentID;
     displayName?: string;
@@ -81,6 +82,7 @@ export const helicopter = (
     transportsBuilder.helicopter(
       helicopter.speed,
       helicopter.maxInjuredsCount,
+      helicopter.maxContinuousFlightTime,
       helicopter.useRescueRate,
       helicopter.id,
       helicopter.displayName

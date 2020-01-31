@@ -13,6 +13,7 @@ const defaultValues = {
   },
   helicopterConfig: {
     useRescueRate: true,
+    maxContinuousFlightTime: 120 * 60 * 1000,
     schedule: {
       startHours: 6,
       startMinutes: 0,
@@ -107,6 +108,7 @@ function parseParameterJSON (json: string): {project; bases: []; shelters: []; t
 
   const helicopterConfig = {
     useRescueRate: row.helicopterConfig.useRescueRate,
+    maxContinuousFlightTime: row.helicopterConfig.maxContinuousFlightTime,
     schedule: {
       startHours: row.helicopterConfig.schedule.startHours,
       startMinutes: row.helicopterConfig.schedule.startMinutes,
@@ -127,6 +129,7 @@ function parseParameterJSON (json: string): {project; bases: []; shelters: []; t
     helicopters: base.helicopters.map(helicopter => ({
       speed: helicopter.speed,
       maxInjuredsCount: helicopter.maxInjuredsCount,
+      maxContinuousFlightTime: helicopterConfig.maxContinuousFlightTime,
       useRescueRate: helicopter.useRescueRate !== undefined ? helicopter.useRescueRate : helicopterConfig.useRescueRate,
       schedule: helicopter.schedule ? {
         startHours: helicopter.schedule.startHours,
