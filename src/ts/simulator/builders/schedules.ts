@@ -16,7 +16,6 @@ import {
   TransportScheduleCache,
   TransportTask,
   TransportTaskType,
-  GeneralTaskType
 } from '../entities'
 
 export const defultSchduleCache = <TT, T extends Task<TT>, M extends Mission<TT, T>>(): ScheduleCache<TT, T, M> => ({
@@ -38,7 +37,6 @@ export const defaultTransportScheduleCache = (): TransportScheduleCache => ({
 
 export const defaultPlaceScheduleCache = (): PlaceScheduleCache => ({
   ...defultSchduleCache<PlaceTaskType, PlaceTask, PlaceMission>(),
-  injuredsCount: 0
 })
 
 export const defaultShelterScheduleCache = (): ShelterScheduleCache => ({
@@ -48,7 +46,8 @@ export const defaultShelterScheduleCache = (): ShelterScheduleCache => ({
 })
 
 export const defaultBaseScheduleCache = (): BaseScheduleCache => ({
-  ...defaultPlaceScheduleCache()
+  ...defaultPlaceScheduleCache(),
+  injuredsCount: 0
 })
 
 export const transport = (startHours: number, startMinutes: number, endHours: number, endMinutes: number, cache?: TransportScheduleCache): TransportSchedule => ({

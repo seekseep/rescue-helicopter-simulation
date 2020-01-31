@@ -84,10 +84,14 @@ export const copyTaskTypeToTasksMap = <TT, T extends Task<TT>>(taskTypeToTasksMa
 export const copyNumberToTasksMap = <
   TT,
   T extends Task<TT>
->(numberToTasksMap: Map<number, T[]>) : Map<number, T[]> => {
+>(numberToTasksMap: Map<number, T[]>) : Map<number, Map<number, T>> => {
   const map = new Map()
   numberToTasksMap.forEach((tasks, number) => {
-    map.set(number, copyTasksArray(tasks))
+    const m = new Map()
+    map.set(number, m)
+    tasks.forEach((task, id) => {
+      m.set(id, task)
+    })
   })
   return map
 }
@@ -96,13 +100,18 @@ export const copyNumberToMissionsMap = <
   TT,
   T extends Task<TT>,
   M extends Mission<TT, T>
->(numberToMissionsMap: Map<number, M[]>) : Map<number, M[]> => {
+>(numberToMissionsMap: Map<number, Map<number, M>>) : Map<number, Map<number, M>> => {
   const map = new Map()
   numberToMissionsMap.forEach((missions, number) => {
-    map.set(number, copyMissionsArray(missions))
+    const m = new Map()
+    map.set(number, m)
+    missions.forEach((mission, id) => {
+      m.set(id, mission)
+    })
   })
   return map
 }
+
 
 export const copyNumberToMissionMap = <
   TT,

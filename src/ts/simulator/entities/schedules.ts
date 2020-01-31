@@ -16,9 +16,9 @@ export interface ScheduleCache <TT, T extends Task<TT>, M extends Mission<TT, T>
   lastMission: M;
   freeTasks: GeneralTask[];
   taskTypeToTasks: Map<TT, T[]>;
-  finishedAtTimeToTasks: Map<number, T[]>;
-  startedAtTimeToMissions: Map<number, M[]>;
-  finishedAtTimeToMissions: Map<number, M[]>;
+  finishedAtTimeToTasks: Map<number, Map<number, T>>;
+  startedAtTimeToMissions: Map<number, Map<number, M>>;
+  finishedAtTimeToMissions: Map<number, Map<number, M>>;
   activeMissions: Map<number, M>;
   notFinishedMissions: Map<number, M>;
   notPassedMissionPoints: Map<number, Date>;

@@ -39,23 +39,34 @@ export default class HelicopterAgent extends TransportAgent {
 
   action (): void {
     super.action()
-    if (this.isWorking) return
-
-    const { shelterAgents } = this.environment
-    if (shelterAgents.length < 1) return
-
-    const rescueMission = this.buildOptimalRescueMission(shelterAgents)
-    if (rescueMission === null) return
-
-    const returnBaseMission = this.buildLatestReturnBaseMission(rescueMission)
-    const returnBaseMissionService = new TransportReturnMissionService(returnBaseMission)
-    const finishDate = this.scheduleService.getFinishDate(this.current)
-    if (returnBaseMissionService.stayTaskStartedAt <= finishDate) {
-      this.submitMission(rescueMission)
+    if (this.isWorking) {
       return
     }
 
+    const { shelterAgents } = this.environment
+    if (shelterAgents.length < 1) {
+      return
+    }
+
+    const rescueMission = this.buildOptimalRescueMission(shelterAgents)
+    if (rescueMission === null) {
+      return
+    }
+
+    const finishDate = this.scheduleService.getFinishDate(this.current)
+    if (rescueMission.finishedAt < finishDate) {
+      const returnBaseMission = this.buildLatestReturnBaseMission(rescueMission)
+      const returnBaseMissionService = new TransportReturnMissionService(returnBaseMission)
+      if (returnBaseMissionService.stayTaskStartedAt <= finishDate) {
+        this.submitMission(rescueMission)
+        return
+      }
+    }
+
     const optimalReturnBaseMission = this.buildOptimalReturnMission(this.scheduleService.lastMission)
+    if (optimalReturnBaseMission.duration < 1) {
+      debugger;
+    }
     this.submitMission(optimalReturnBaseMission)
   }
 
@@ -102,11 +113,12 @@ export default class HelicopterAgent extends TransportAgent {
 
   buildOptimalReturnMission (beforeMission: TransportMission): TransportMission {
     const transportService = this.transportService
-    const { finishedAt, finishedIn } = beforeMission
+    const startedAt = beforeMission.finishedAt > this.current  ? beforeMission.finishedAt : this.current
+    const startedIn = beforeMission.finishedIn
     const helicopterBases = this.environment.helicopterBases
-    const fastestArrivableHelicopterBases = transportService.getFastestArrivablePlaces(finishedIn, helicopterBases)
+    const fastestArrivableHelicopterBases = transportService.getFastestArrivablePlaces(startedIn, helicopterBases)
     const fastestArrivableHelicopterBase = fastestArrivableHelicopterBases[0]
-    return this.buildReturnBaseMission(finishedAt, finishedIn, fastestArrivableHelicopterBase)
+    return this.buildReturnBaseMission(startedAt, startedIn, fastestArrivableHelicopterBase)
   }
 
   buildLatestReturnBaseMission (beforeMission: TransportMission): TransportMission {
@@ -123,9 +135,10 @@ export default class HelicopterAgent extends TransportAgent {
 
     const { environment, transportService } = this
     const { lastMission } = this.scheduleService
+    const startedAt = lastMission.finishedAt > this.current  ? lastMission.finishedAt : this.current
 
     const moveToShelterTask = transportService.buildMoveToPlaceTask(
-      lastMission.finishedAt,
+      startedAt,
       lastMission.finishedIn,
       shelterAgent.place
     )
@@ -250,7 +263,7 @@ export default class HelicopterAgent extends TransportAgent {
     const { environment, transportService, scheduleService } = this
     const tasks = []
 
-    const baseAgent = environment.getBaseAgentByPlaceID(stayedIn.id)
+    const baseAgent = environment.getBaseAgentByPlaceID(stayedIn.id).clone()
     const startDateOfNextDay = scheduleService.getStartDateOfNextDay(this.current)
 
     const moveToReturnBaseTask = transportService.buildMoveToPlaceTask(
@@ -266,6 +279,13 @@ export default class HelicopterAgent extends TransportAgent {
         utils.diffDates(moveToReturnBaseTask.finishedAt, startDateOfNextDay)
       ),
       stayedIn
+    )
+    baseAgent.addMission(
+      builders.missions.places.refuelByTransportTaskAndTransport(
+        baseAgent.id,
+        refuelTask,
+        this.transport
+      )
     )
 
     if (!utils.equalDate(moveToReturnBaseTask.finishedAt, refuelTask.startedAt)) {

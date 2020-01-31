@@ -22,6 +22,7 @@ export enum PlaceTaskType {
 }
 
 export interface Task<TT> {
+  id: number,
   type: TT;
   startedAt: Date;
   finishedAt: Date;

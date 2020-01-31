@@ -7,6 +7,7 @@ export const rescue = (
   recuedIn: Place,
   injuredsCount: number
 ): TransportTask => ({
+  id: utils.getNewID(),
   type: TransportTaskType.RESCUE,
   startedAt,
   startedIn: recuedIn,
@@ -23,6 +24,7 @@ export const unload = (
   unloadedIn: Place,
   injuredsCount: number
 ): TransportTask => ({
+  id: utils.getNewID(),
   type: TransportTaskType.UNLOAD,
   startedAt,
   startedIn: unloadedIn,
@@ -39,6 +41,7 @@ export const move = (
   startedIn: Place,
   finishedIn: Place
 ): TransportTask => ({
+  id: utils.getNewID(),
   type: TransportTaskType.MOVE,
   startedAt,
   startedIn,
@@ -54,6 +57,7 @@ export const wait = (
   finishedAt: Date,
   waitedIn: Place
 ): TransportTask => ({
+  id: utils.getNewID(),
   type: TransportTaskType.WAIT,
   startedAt,
   startedIn: waitedIn,
@@ -69,6 +73,7 @@ export const refuel = (
   finishedAt: Date,
   refueledIn: Place
 ): TransportTask => ({
+  id: utils.getNewID(),
   type: TransportTaskType.REFUEL,
   startedAt,
   startedIn: refueledIn,
@@ -84,6 +89,7 @@ export const stay = (
   finishedAt: Date,
   stayedIn: Place
 ): TransportTask => ({
+  id: utils.getNewID(),
   type: TransportTaskType.STAY,
   startedAt,
   finishedAt,

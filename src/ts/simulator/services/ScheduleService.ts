@@ -60,22 +60,39 @@ export default class ScheduleService<TT, T extends Task<TT>, M extends Mission<T
     return utils.dateFromDateAndHoursAndMinutes(nextDate, startHours, startMinutes)
   }
 
-  getTasksByFinishedAtTime (finishedAtTime: number): T[]|null {
+  getTasksByFinishedAtTime (finishedAtTime: number): Map<number, T>|null {
     return this.schedule.cache.finishedAtTimeToTasks.get(finishedAtTime) || null
   }
 
-  getMissionsByStartedAtTime (startedAtTime: number): M[]|null {
+  getMissionsByStartedAtTime (startedAtTime: number): Map<number, M>|null {
     return this.schedule.cache.startedAtTimeToMissions.get(startedAtTime) || null
   }
 
-  getMissionsByFinishedAtTime (finishedAtTime: number):M[]|null {
+  getMissionsByFinishedAtTime (finishedAtTime: number): Map<number, M>|null {
     return this.schedule.cache.finishedAtTimeToMissions.get(finishedAtTime) || null
   }
 
   addMission (mission: M, current: Date): void {
+    if (mission.startedAt < current) {
+      console.warn('invalid mission', mission)
+      debugger;
+    }
     this.missions.push(mission)
     this.updateCacheWithNewMission(mission, current)
-    this.updateCacheWithCurrent(current)
+
+    if (utils.equalDate(mission.startedAt, current)) {
+      this.updateCacheWithStartedMission(mission)
+
+      mission.tasks.forEach(task => {
+        if (utils.equalDate(task.finishedAt, current)) {
+          this.updateCacheWithFinishedTask(task)
+        }
+      })
+    }
+
+    if (utils.equalDate(mission.finishedAt, current)) {
+      this.updateCacheWithFinishedMission(mission)
+    }
   }
 
   updateCacheWithFinishedTask (finishedTask: T): void {
@@ -97,17 +114,17 @@ export default class ScheduleService<TT, T extends Task<TT>, M extends Mission<T
 
     {
       const startedAtTime = mission.startedAt.getTime()
-      cache.startedAtTimeToMissions.set(startedAtTime, [
-        ...(cache.startedAtTimeToMissions.get(startedAtTime) || []),
-        mission
-      ])
+      if (!cache.startedAtTimeToMissions.has(startedAtTime)) {
+        cache.startedAtTimeToMissions.set(startedAtTime, new Map())
+      }
+      cache.startedAtTimeToMissions.get(startedAtTime).set(mission.id, mission)
       cache.notPassedMissionPoints.set(startedAtTime, mission.startedAt)
 
       const finishedAtTime = mission.finishedAt.getTime()
-      cache.finishedAtTimeToMissions.set(finishedAtTime, [
-        ...(cache.finishedAtTimeToMissions.get(finishedAtTime) || []),
-        mission
-      ])
+      if (!cache.finishedAtTimeToMissions.has(finishedAtTime)) {
+        cache.finishedAtTimeToMissions.set(finishedAtTime, new Map())
+      }
+      cache.finishedAtTimeToMissions.get(finishedAtTime).set(mission.id, mission)
       cache.notPassedMissionPoints.set(finishedAtTime, mission.finishedAt)
     }
 
@@ -117,10 +134,10 @@ export default class ScheduleService<TT, T extends Task<TT>, M extends Mission<T
       cache.taskTypeToTasks.set(task.type, tasks)
 
       const finishedAtTime = task.finishedAt.getTime()
-      cache.finishedAtTimeToTasks.set(finishedAtTime, [
-        ...(cache.finishedAtTimeToTasks.get(finishedAtTime) || []),
-        task
-      ])
+      if (!cache.finishedAtTimeToTasks.has(finishedAtTime)) {
+        cache.finishedAtTimeToTasks.set(finishedAtTime, new Map())
+      }
+      cache.finishedAtTimeToTasks.get(finishedAtTime).set(task.id, task)
     })
 
     this.schedule.cache.notFinishedMissions.set(mission.id, mission)
