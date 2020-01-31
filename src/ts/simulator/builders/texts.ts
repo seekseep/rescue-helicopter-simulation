@@ -65,7 +65,7 @@ export const result = (project: Project, environment: Environment): string => {
         missions.map(mission => {
           const { startedAt, startedIn, finishedAt, finishedIn } = mission
           return [
-            `${mission.displayName} (${utils.ceilTime(utils.diffDates(startedAt, finishedAt)) / MINUTE}分)`,
+            `${mission.displayName}#${mission.id} (${utils.ceilTime(utils.diffDates(startedAt, finishedAt)) / MINUTE}分)`,
             `${startedAt.toLocaleString()}@${startedIn.displayName} → ${finishedAt.toLocaleString()}@${finishedIn.displayName}`,
             mission.tasks.map(({ type, startedIn, startedAt, finishedIn, finishedAt, injuredsCount }) => {
               const messages = []
@@ -119,7 +119,22 @@ export const result = (project: Project, environment: Environment): string => {
               return messages
             })
         ]
-      })
+      }),
     ])),
+    '基地間の距離',
+    baseAgents.map((baseAgent, _, baseAgents) => ([
+      baseAgent.displayName,
+      baseAgents.map(toBaseAgent => ([
+        `${baseAgent.displayName} => ${toBaseAgent.displayName}`,
+        [
+          `${utils.distance(baseAgent.position, toBaseAgent.position)}m`,
+          `${
+            utils.ceilTime(
+              utils.moveTime(baseAgent.position, toBaseAgent.position, helicopterAgents[0].speed)
+            ) / MINUTE
+          }分`,
+        ]
+      ]))
+    ]))
   ], 0)
 }
