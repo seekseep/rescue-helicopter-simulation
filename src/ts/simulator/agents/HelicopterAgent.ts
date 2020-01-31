@@ -57,8 +57,9 @@ export default class HelicopterAgent extends TransportAgent {
       return
     }
 
-    const returnBaseMission = this.buildLatestReturnBaseMission(rescueMission)
-    if (new TransportReturnMissionService(returnBaseMission).stayTaskStartedAt > finishDate) {
+    const moveToLatestHelicopterBaseTime = this.getMoveToLatestHelicopterBaseTime(rescueMission.finishedIn)
+    const arrivedInLatestHelicopterBaseAt = utils.addDateAndTime(rescueMission.finishedAt, moveToLatestHelicopterBaseTime)
+    if (arrivedInLatestHelicopterBaseAt > finishDate) {
       this.submitMission(this.buildOptimalReturnMission(this.scheduleService.lastMission))
       return
     }
@@ -129,13 +130,12 @@ export default class HelicopterAgent extends TransportAgent {
     return this.buildReturnBaseMission(startedAt, startedIn, fastestArrivableHelicopterBase)
   }
 
-  buildLatestReturnBaseMission (beforeMission: TransportMission): TransportMission {
+  getMoveToLatestHelicopterBaseTime(fromPlace:Place): number {
     const transportService = this.transportService
-    const { finishedAt, finishedIn } = beforeMission
     const helicopterBases = this.environment.helicopterBases
-    const latestArrivableHelicopterBases = transportService.getLatestArrivablePlaces(finishedIn, helicopterBases)
-    const latestArrivableHelicopterBase = latestArrivableHelicopterBases[0]
-    return this.buildReturnBaseMission(finishedAt, finishedIn, latestArrivableHelicopterBase)
+    const latestArrivableHelicopterBases = transportService.getLatestArrivablePlaces(fromPlace, helicopterBases)
+    const helicopterBase = latestArrivableHelicopterBases[0]
+    return utils.moveTime(fromPlace.position, helicopterBase.position, this.transport.speed)
   }
 
   buildRescueMission (shelterAgent: ShelterAgent): TransportMission|null {
