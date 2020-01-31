@@ -107,6 +107,8 @@ function parseParameterJSON (json: string): {project; bases: []; shelters: []; t
   }
 
   const helicopterConfig = {
+    speed: row.helicopterConfig.speed,
+    maxInjuredsCount: row.helicopterConfig.maxInjuredsCount,
     useRescueRate: row.helicopterConfig.useRescueRate,
     maxContinuousFlightTime: row.helicopterConfig.maxContinuousFlightTime,
     schedule: {
@@ -127,9 +129,9 @@ function parseParameterJSON (json: string): {project; bases: []; shelters: []; t
     baseType: base.baseType === 'HELICOPTER' ? BaseType.HELICOPTER : BaseType.FORWARD,
     maxLandableCount: base.maxLandableCount,
     helicopters: base.helicopters.map(helicopter => ({
-      speed: helicopter.speed,
-      maxInjuredsCount: helicopter.maxInjuredsCount,
-      maxContinuousFlightTime: helicopterConfig.maxContinuousFlightTime,
+      speed: helicopter.speed || helicopterConfig.speed,
+      maxInjuredsCount: helicopter.maxInjuredsCount ||  helicopterConfig.maxInjuredsCount,
+      maxContinuousFlightTime: helicopter.maxContinuousFlightTime || helicopterConfig.maxContinuousFlightTime,
       useRescueRate: helicopter.useRescueRate !== undefined ? helicopter.useRescueRate : helicopterConfig.useRescueRate,
       schedule: helicopter.schedule ? {
         startHours: helicopter.schedule.startHours,
