@@ -10,6 +10,7 @@
   },
   "helicopterConfig": {
       "useRescueRate": true,
+      "maxContinuousFlightTime": 7200000,
       "schedule": {
           "startHours": 6,
           "startMinutes": 0,
