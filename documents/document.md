@@ -17,7 +17,7 @@
 
 ![](https://github.com/seekseep/rescue-helicopter-simulation/blob/master/out/uml/er-agents/agents-entity-relationship.png?raw=true)
 
-## ミッション
+# スケジュール
 - エージェントはスケジュールを持つ
 - 単一の実行者としてのエージェントを有する
 - ミッションは複数のタスクを保有する
@@ -25,7 +25,7 @@
 
 ![](https://github.com/seekseep/rescue-helicopter-simulation/blob/master/out/uml/er-schedule/schedule-entity-relationship.png?raw=true)
 
-# ミッションとタスク
+## ミッションとタスク
 - ミッションは一つ以上のタスクを保有している
 - すべてのタスクは以下の情報を持っている
   - タスク開始時間
@@ -38,7 +38,7 @@
 - ミッションとタスクの一覧
 - タスクの概念をつくることでタスク終了時に救助率の変更などを可能にした
 
-![](https://github.com/seekseep/rescue-helicopter-simulation/blob/master/out/uml/er-schedule/schedule-entity-relationship.png?raw=true)
+![](https://github.com/seekseep/rescue-helicopter-simulation/blob/master/out/uml/er-tasks/tasks-entity-relationship.png?raw=true)
 
 ## 空き時間の算出
 - 基本的には最終ミッション完了後の時間がミッション可能時間になる
