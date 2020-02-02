@@ -1,0 +1,31 @@
+@startuml tasks_entity_relationship
+
+interface Task {
+  type: TaskType
+  startedAt: Date
+  finishedAt: Date
+  duration: Number
+}
+
+class PlaceTask {
+  injuredsCount: Number
+  transport: Transport
+}
+
+class TransportTask {
+  startedIn: Place
+  finishedIn: Place
+  injuredsCount: Number
+  isRefueled: Boolean
+}
+
+class GeneralTask {
+
+}
+
+
+Task<|--PlaceTask
+Task<|--TransportTask
+Task<|--GeneralTask
+
+@enduml

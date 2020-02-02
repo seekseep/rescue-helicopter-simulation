@@ -1,0 +1,21 @@
+@startuml helicopter_agent_action_flow_chart
+
+start
+
+if(作業中ではない) then (はい)
+  :救助対象の被災地の一覧を取得する;
+  if(救助対象の被災地の一覧が空ではない) then (はい)
+    :被災地の一覧から最適な救助ミッションを作成する;
+    if(救助ミッションがある) then (はい)
+      if(ミッションを完了後、作業時間内にHBへ帰還できる) then (はい)
+        :ミションを確定する;
+        stop
+      endif
+    endif
+  endif
+endif
+:最寄りのHBへ帰還する;
+
+stop
+
+@enduml

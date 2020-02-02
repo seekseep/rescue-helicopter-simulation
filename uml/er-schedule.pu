@@ -1,0 +1,28 @@
+@startuml shedule_entity_relationship
+
+class Schedule {
+  startHours: Number
+  startMinutes: Number
+  endHours: Number
+  endMinutes: Number
+  missions: Mission[]
+}
+
+interface Mission {
+  tasks: Task[]
+  startedAt: Date
+  finishedAt: Date
+  duration: Number
+}
+
+interface Task {
+  taskType: TaskType
+  startedAt: Date
+  finishedAt: Date
+  duration: Number
+}
+
+Schedule||--o{Mission
+Mission||--|{Task
+
+@enduml

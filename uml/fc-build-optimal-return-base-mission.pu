@@ -1,0 +1,10 @@
+@startuml build_optimal_return_base_mission_flow_chart
+
+start
+:最終ミッションの終了日時を取得;
+:最終ミッションの終了場所を取得;
+:最終ミッションの終了場所から最も近いHBを取得;
+:帰還ミッションを作成;
+end
+
+@enduml

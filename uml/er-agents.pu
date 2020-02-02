@@ -1,0 +1,34 @@
+@startuml agents_entity_relationship
+
+class Agent {
+  id: Number
+  schedule: Schedule
+}
+
+class PlaceAgent {
+  place: Place
+}
+
+class ShelterAgent {
+  shelter: Shelter
+}
+
+class BaseAgent{
+  base: Base
+}
+
+class TransportAgent {
+  transport: Transport
+}
+
+class HelicopterAgent {
+  helicopter: Helicopter
+}
+
+Agent<|--PlaceAgent
+PlaceAgent<|--BaseAgent
+PlaceAgent<|--ShelterAgent
+Agent<|--TransportAgent
+TransportAgent<|--HelicopterAgent
+
+@enduml
