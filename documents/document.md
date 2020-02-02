@@ -51,7 +51,7 @@
   - 現在日時よりも先のミッション終了日時
   - 未終了のミッションの一覧
 
-![](https://github.com/seekseep/rescue-helicopter-simulation/blob/master/documents/images/er-schedule/concept-free-tasks.png?raw=true)
+![](https://github.com/seekseep/rescue-helicopter-simulation/blob/master/documents/images/concept-free-tasks.png?raw=true)
 
 ### 計算手順
 
