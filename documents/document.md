@@ -167,4 +167,4 @@
   - 滞在タスクの作成
     - 滞在タスクは翌日の作業開始日時までHBに滞在する
 
-![](https://github.com/seekseep/rescue-helicopter-simulation/blob/master/out/uml/fc-build-return-base-mission/build-return-base-mission-flow-chart.png.png?raw=true)
+![](https://github.com/seekseep/rescue-helicopter-simulation/blob/master/out/uml/fc-build-return-base-mission/build-return-base-mission-flow-chart.png?raw=true)
