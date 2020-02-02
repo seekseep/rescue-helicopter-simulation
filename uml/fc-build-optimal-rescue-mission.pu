@@ -1,4 +1,4 @@
-@startuml build-free-optimal-rescue-mission-flow-chart
+@startuml build-optimal-rescue-mission-flow-chart
 
 start
 :対象となる被災地の一覧(a)取得;
