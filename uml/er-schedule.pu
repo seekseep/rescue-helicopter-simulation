@@ -1,4 +1,9 @@
-@startuml shedule_entity_relationship
+@startuml schedule-entity-relationship
+
+class Agent {
+  id: Number
+  schedule: Schedule
+}
 
 class Schedule {
   startHours: Number
@@ -9,6 +14,7 @@ class Schedule {
 }
 
 interface Mission {
+  agentID: Number;
   tasks: Task[]
   startedAt: Date
   finishedAt: Date
@@ -22,6 +28,7 @@ interface Task {
   duration: Number
 }
 
+Agent||--||Schedule
 Schedule||--o{Mission
 Mission||--|{Task
 

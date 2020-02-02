@@ -1,4 +1,4 @@
-@startuml build_return_base_mission_flow_chart
+@startuml build-return-base-mission-flow-chart
 
 start
 

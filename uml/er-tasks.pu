@@ -1,4 +1,4 @@
-@startuml tasks_entity_relationship
+@startuml tasks-entity-relationship
 
 interface Task {
   type: TaskType

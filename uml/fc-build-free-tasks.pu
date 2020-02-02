@@ -1,4 +1,4 @@
-@startuml build_free_tasks_flow_chart
+@startuml build-free-tasks-flow-chart
 
 start
 :すべてのミッションの切り替わり日時を取得;

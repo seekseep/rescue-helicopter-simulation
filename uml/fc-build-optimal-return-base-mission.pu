@@ -1,4 +1,4 @@
-@startuml build_optimal_return_base_mission_flow_chart
+@startuml build-optimal-return-base-mission-flow-chart
 
 start
 :最終ミッションの終了日時を取得;

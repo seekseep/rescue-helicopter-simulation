@@ -1,4 +1,4 @@
-@startuml helicopter_agent_action_flow_chart
+@startuml helicopter-agent-action-flow-chart
 
 start
 

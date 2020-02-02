@@ -1,4 +1,4 @@
-@startuml build_rescue_mission_flow_chart
+@startuml build-rescue-mission-flow-chart
 
 start
 

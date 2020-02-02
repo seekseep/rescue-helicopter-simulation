@@ -15,10 +15,15 @@
 - 今回の場合、ヘリコプターと被災地と基地がエージェントに対応する
 - すべてのエージェントは並行して実行できるミッションの数に決まりがある
 
+![](https://github.com/seekseep/rescue-helicopter-simulation/blob/master/out/uml/er-agents/agents-entity-relationship.png?raw=true)
+
 ## ミッション
+- エージェントはスケジュールを持つ
 - 単一の実行者としてのエージェントを有する
 - ミッションは複数のタスクを保有する
 - 救助や帰還などのミッションが存在する
+
+![](https://github.com/seekseep/rescue-helicopter-simulation/blob/master/out/uml/er-schedule/schedule-entity-relationship.png?raw=true)
 
 # ミッションとタスク
 - ミッションは一つ以上のタスクを保有している
@@ -33,6 +38,8 @@
 - ミッションとタスクの一覧
 - タスクの概念をつくることでタスク終了時に救助率の変更などを可能にした
 
+![](https://github.com/seekseep/rescue-helicopter-simulation/blob/master/out/uml/er-schedule/schedule-entity-relationship.png?raw=true)
+
 ## 空き時間の算出
 - 基本的には最終ミッション完了後の時間がミッション可能時間になる
 - すでに確定しているミッションの間の時間を活用するためミッション作成可能時間を生成する
@@ -44,6 +51,8 @@
   - 現在日時よりも先のミッション終了日時
   - 未終了のミッションの一覧
 
+![](https://github.com/seekseep/rescue-helicopter-simulation/blob/master/documents/images/er-schedule/concept-free-tasks.png?raw=true)
+
 ### 計算手順
 
 - 現日時と現在よりも先のミッションの開始日時と終了日時を昇順で並べる
@@ -52,6 +61,8 @@
 - 生成されたミッション作成可能時間のうち連続している(終了日時と開始日時が同一)ものがあればそれを連結する
   - 並行するタスクの数が多いエージェントは小さく連続する追加可能時間が発生する可能性がある
   - 連結することで作成された追加可能時間よりも長いミッションを追加できるようになる
+
+![](https://github.com/seekseep/rescue-helicopter-simulation/blob/master/out/uml/fc-build-free-tasks/build-free-tasks-flow-chart.png?raw=true)
 
 # ヘリコプターの行動
 
@@ -68,6 +79,8 @@
     - 最適ミッションがあり、実行可能な場合
       - 最適なミッションを確定する
 
+![](https://github.com/seekseep/rescue-helicopter-simulation/blob/master/out/uml/fc-helicopter-agent/helicopter-agent-action-flow-chart.png?raw=true)
+
 ## 対象被災地について
 - 将来的な未完了の救助者1人以上いる被災地
   - 将来的な未完了の救助者とは、確定済みの救助ミッションの救助数の合計
@@ -77,12 +90,23 @@
   -  救助ミッションの連続飛行時間が自身の連続最高飛行時間と比較する
 
 ## 最適な救助ミッションの選定
-- 与えられた被災地の一覧から最適な救助ミッションを作成する
-- 最適な救助ミッションがない場合が存在する
-- 救助ミッション作成時に救助率を加味する場合
-  - 最小の救助率の被災地の一覧を作成する
-- 対象の
 
+- 最適なミッションが見つからない場合がある
+
+### 基本的な流れ
+  1. 与えられた被災地の一覧の中から最適な最適な被災地を選ぶ
+  2. 最適な被災地に対して全ヘリコプターが救助ミッションを作成する
+  3. 作成された救助ミッションの中で最速で終わるミッションを選ぶ
+  4. 最速で終わるミッションの実行者が自分の場合はそれを最適なミッションとする
+  5. 最速で終わるミッションの実行者が自分でない場合は 1.で与えられた被災地の一覧から 1.で決めた最適な被災地を取り除いた一覧を作成して1.に戻る
+
+![](https://github.com/seekseep/rescue-helicopter-simulation/blob/master/out/uml/fc-build-optimal-rescue-mission/build-optimal-rescue-mission-flow-chart.png?raw=true)
+
+### 待機時間と最適なミッション
+
+- いずれのヘリコプターが同じ被災地に対してミッションを作った場合、同様に待機時間が発生する
+- 他ヘリとの比較によって被災地を選ぶ処理の段階では待機時間を加味する必要がない
+- 同じ救助率の被災地の中から被災地を選ぶ場合は待機時間を加味して最短でミッションが終了する
 
 ### 救助ミッションの作成
 - 最大のタスクの流れ
@@ -115,7 +139,9 @@
   - 空き時間内での移動先でのタスクの作成
   - 到着完了日時と移動先でのタスクの開始日時のズレがある場合、待機タスクを作成
 
-### 作業時間内のHBへの帰還について
+![](https://github.com/seekseep/rescue-helicopter-simulation/blob/master/out/uml/fc-build-rescue-mission/build-rescue-mission-flow-chart.png?raw=true)
+
+## 作業時間内のHBへの帰還について
 - 前提
   - ヘリコプターは作業時間終了までにHBに帰還する必要がある
   - すべてのヘリコプターがいずれかのヘHBに必ず帰還できるようにHBの着陸可能数がある
@@ -128,6 +154,8 @@
 - 終了地点から最も近いHBを探す
 - 直前の終了時間と終了場所、最も近いHBを用いて帰還ミッションを作成する
 
+![](https://github.com/seekseep/rescue-helicopter-simulation/blob/master/out/uml/fc-build-optimal-return-base-mission/build-optimal-return-base-mission.png?raw=true)
+
 ### 帰還ミッションの作成
 - 開始時間と開始場所、帰還場所を元に帰還ミッションの作成を行う
 - タスクの作成
@@ -138,3 +166,5 @@
     - 翌日の作業開始時点で連続飛行可能時間を最大にするため
   - 滞在タスクの作成
     - 滞在タスクは翌日の作業開始日時までHBに滞在する
+
+![](https://github.com/seekseep/rescue-helicopter-simulation/blob/master/out/uml/fc-build-return-base-mission/build-return-base-mission.png?raw=true)

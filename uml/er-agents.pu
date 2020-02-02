@@ -1,4 +1,4 @@
-@startuml agents_entity_relationship
+@startuml agents-entity-relationship
 
 class Agent {
   id: Number
