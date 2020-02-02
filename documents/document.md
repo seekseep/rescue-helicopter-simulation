@@ -79,7 +79,7 @@
     - 最適ミッションがあり、実行可能な場合
       - 最適なミッションを確定する
 
-![](https://github.com/seekseep/rescue-helicopter-simulation/blob/master/out/uml/fc-helicopter-agent/helicopter-agent-action-flow-chart.png?raw=true)
+![](https://github.com/seekseep/rescue-helicopter-simulation/blob/master/out/uml/fc-helicopter-action/helicopter-agent-action-flow-chart.png?raw=true)
 
 ## 対象被災地について
 - 将来的な未完了の救助者1人以上いる被災地
