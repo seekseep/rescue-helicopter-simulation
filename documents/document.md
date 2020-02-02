@@ -154,7 +154,7 @@
 - 終了地点から最も近いHBを探す
 - 直前の終了時間と終了場所、最も近いHBを用いて帰還ミッションを作成する
 
-![](https://github.com/seekseep/rescue-helicopter-simulation/blob/master/out/uml/fc-build-optimal-return-base-mission/build-optimal-return-base-mission.png?raw=true)
+![](https://github.com/seekseep/rescue-helicopter-simulation/blob/master/out/uml/fc-build-optimal-return-base-mission/build-optimal-return-base-mission-flow-chart.png?raw=true)
 
 ### 帰還ミッションの作成
 - 開始時間と開始場所、帰還場所を元に帰還ミッションの作成を行う
@@ -167,4 +167,4 @@
   - 滞在タスクの作成
     - 滞在タスクは翌日の作業開始日時までHBに滞在する
 
-![](https://github.com/seekseep/rescue-helicopter-simulation/blob/master/out/uml/fc-build-return-base-mission/build-return-base-mission.png?raw=true)
+![](https://github.com/seekseep/rescue-helicopter-simulation/blob/master/out/uml/fc-build-return-base-mission/build-return-base-mission-flow-chart.png.png?raw=true)
