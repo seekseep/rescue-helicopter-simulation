@@ -33,7 +33,7 @@ import {
   TransportTask,
   PlaceTask,
   GeneralTask,
-  TaskTyep,
+  TaskType,
   GeneralTaskType
 } from './tasks'
 import {
@@ -70,7 +70,7 @@ export {
   ShelterSchedule,
   ShelterScheduleCache,
   Task,
-  TaskTyep,
+  TaskType,
   Transport,
   TransportID,
   TransportMission,

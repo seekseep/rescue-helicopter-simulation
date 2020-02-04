@@ -43,4 +43,4 @@ export type PlaceTask = {
   injuredsCount: number;
 } & Task<PlaceTaskType>
 
-export type TaskTyep = GeneralTaskType | TransportTaskType | PlaceTaskType
+export type TaskType = GeneralTaskType | TransportTaskType | PlaceTaskType

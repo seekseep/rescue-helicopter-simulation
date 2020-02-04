@@ -1,9 +1,9 @@
-import { TaskTyep, TransportTaskType, PlaceTaskType, Project } from '../entities'
+import { TaskType, TransportTaskType, PlaceTaskType, Project } from '../entities'
 import * as utils from '../utilities'
 import Environment from '../Environment'
 import { MINUTE } from '../constants'
 
-export const taskTypeToLabel = (taskType: TaskTyep): string => {
+export const taskTypeToLabel = (taskType: TaskType): string => {
   switch (taskType) {
     case PlaceTaskType.HOLD:
     case TransportTaskType.STAY: return '滞在'
